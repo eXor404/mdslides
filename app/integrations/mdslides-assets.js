@@ -1,6 +1,8 @@
-import { promises as fs } from 'node:fs';
-import { resolve, relative, extname, join, dirname, sep } from 'node:path';
+import { promises as fs, mkdtempSync, rmSync } from 'node:fs';
+import { resolve, relative, extname, join, dirname, basename, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tmpdir } from 'node:os';
+import { findChrome, printUrlToPdf } from './pdf-export.js';
 
 const MIME = {
   '.png': 'image/png',
@@ -64,6 +66,38 @@ export default function mdslidesAssets() {
     name: 'mdslides:assets',
     hooks: {
       'astro:server:setup': ({ server }) => {
+        // PDF export endpoint: prints the live /print route to PDF with
+        // headless Chrome and streams it back as a download. This is the deck
+        // PDF button's primary path — browser-independent and pixel-accurate
+        // (Safari/Chrome ⌘P can't reliably size or color slide pages).
+        server.middlewares.use(async (req, res, next) => {
+          const path = (req.url || '').split('?')[0];
+          if (path !== '/__export.pdf') return next();
+          const chrome = findChrome();
+          if (!chrome) {
+            res.statusCode = 501;
+            res.end('No headless Chrome found. Install Google Chrome or set CHROME_PATH.');
+            return;
+          }
+          const host = req.headers.host || 'localhost';
+          const name = deckFile ? basename(deckFile).replace(/\.md$/i, '') : 'slides';
+          const dir = mkdtempSync(join(tmpdir(), 'mdslides-pdf-'));
+          const pdfPath = join(dir, `${name}.pdf`);
+          try {
+            await printUrlToPdf(chrome, `http://${host}/print/`, pdfPath);
+            const data = await fs.readFile(pdfPath);
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="${name}.pdf"`);
+            res.setHeader('Content-Length', String(data.length));
+            res.end(data);
+          } catch (err) {
+            res.statusCode = 500;
+            res.end(`PDF export failed: ${err.message}`);
+          } finally {
+            try { rmSync(dir, { recursive: true, force: true }); } catch {}
+          }
+        });
+
         // Live-reload when the deck markdown changes (it lives outside Astro's
         // own watched tree, so add it explicitly).
         if (deckFile) {

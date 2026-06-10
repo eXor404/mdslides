@@ -174,7 +174,10 @@ h1 {
   background: var(--grad);
   -webkit-background-clip: text;
   background-clip: text;
-  color: transparent;
+  /* Solid fallback so the title is never invisible if clip-to-text is
+     unsupported (notably some print/PDF engines). */
+  color: var(--accent);
+  -webkit-text-fill-color: transparent;
 }
 h2 { font-size: 52px; }
 h3 { font-size: 38px; color: var(--text-muted); font-weight: 600; }
@@ -286,6 +289,8 @@ hr { border: none; border-top: 1px solid var(--border); width: 100%; }
   backdrop-filter: blur(8px);
 }
 .ctl:hover { color: var(--text); border-color: var(--border-strong); }
+.ctl.busy { opacity: .5; pointer-events: none; animation: ctl-pulse 1s ease-in-out infinite; }
+@keyframes ctl-pulse { 50% { opacity: .25; } }
 .counter { font: 600 14px var(--mono); color: var(--text-muted); padding: 0 8px; }
 
 .help {
@@ -330,8 +335,28 @@ hr { border: none; border-top: 1px solid var(--border); width: 100%; }
 }
 
 /* ── Print / PDF: one page per slide ── */
-html.print, html.print body { overflow: visible; background: #000; }
+html.print, html.print body {
+  overflow: visible;
+  background: #000;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
 .print-deck { display: block; }
+.print-deck .slide { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.print-bar {
+  position: fixed; top: 16px; right: 16px; z-index: 100;
+  display: flex; gap: 10px; align-items: center;
+}
+.print-bar a, .print-bar button {
+  font: 600 14px var(--font);
+  border-radius: 9px; padding: 9px 16px; cursor: pointer;
+  border: 1px solid var(--border-strong); text-decoration: none;
+  color: var(--text); background: var(--surface);
+}
+.print-bar button { background: var(--accent); color: #fff; border-color: transparent; }
+.print-bar a:hover { border-color: var(--text-dim); }
+.print-bar button:hover { filter: brightness(1.08); }
+@media print { .print-bar { display: none !important; } }
 .print-deck .slide {
   position: relative; inset: auto;
   width: var(--canvas-w); height: var(--canvas-h);
@@ -341,6 +366,7 @@ html.print, html.print body { overflow: visible; background: #000; }
 }
 @page { size: 1280px 720px; margin: 0; }
 @media print {
-  html, body { background: #000; }
-  .chrome, .progress, .help { display: none !important; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  html, body { background: #000 !important; }
+  .chrome, .progress, .help, .print-bar { display: none !important; }
 }

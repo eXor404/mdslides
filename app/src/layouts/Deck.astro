@@ -46,13 +46,31 @@ function slideStyle(s: Slide) {
   </head>
   <body>
     {print ? (
-      <div class="print-deck">
-        {slides.map((s) => (
-          <div class={slideClass(s)} style={slideStyle(s)}>
-            <div class="slide-inner" set:html={s.html} />
-          </div>
-        ))}
-      </div>
+      <>
+        <div class="print-bar" id="print-bar">
+          <a class="print-back" href="/">‹ Back to deck</a>
+          <button class="print-do" id="print-do">Save as PDF</button>
+        </div>
+        <div class="print-deck">
+          {slides.map((s) => (
+            <div class={slideClass(s)} style={slideStyle(s)}>
+              <div class="slide-inner" set:html={s.html} />
+            </div>
+          ))}
+        </div>
+        <script is:inline>
+          (() => {
+            const go = () => window.print();
+            document.getElementById('print-do')?.addEventListener('click', go);
+            // Opened from the deck's PDF button (#print) → auto-open the dialog
+            // once layout/fonts settle. A manual visit to /print just shows the
+            // slides plus the button.
+            if (location.hash === '#print') {
+              window.addEventListener('load', () => setTimeout(go, 450));
+            }
+          })();
+        </script>
+      </>
     ) : (
       <>
         <div class="deck" id="deck">
@@ -79,6 +97,9 @@ function slideStyle(s: Slide) {
                 <button class="ctl" id="prev" aria-label="Previous slide" title="Previous (←)">‹</button>
                 <button class="ctl" id="next" aria-label="Next slide" title="Next (→)">›</button>
                 <button class="ctl" id="overview-btn" aria-label="Overview" title="Overview (O)">▦</button>
+                <button class="ctl" id="print-btn" aria-label="Print to PDF" title="Print / Save as PDF (P)">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                </button>
                 <button class="ctl" id="fullscreen-btn" aria-label="Fullscreen" title="Fullscreen (F)">⤢</button>
                 <button class="ctl" id="theme-btn" aria-label="Toggle theme" title="Theme">◐</button>
               </div>
@@ -88,7 +109,7 @@ function slideStyle(s: Slide) {
         </div>
 
         <div class="help" id="help" hidden>
-          <kbd>←</kbd><kbd>→</kbd> navigate · <kbd>O</kbd> overview · <kbd>F</kbd> fullscreen · <kbd>.</kbd> black · <kbd>?</kbd> help
+          <kbd>←</kbd><kbd>→</kbd> navigate · <kbd>O</kbd> overview · <kbd>F</kbd> fullscreen · <kbd>P</kbd> pdf · <kbd>.</kbd> black · <kbd>?</kbd> help
         </div>
 
         <script is:inline>
@@ -172,6 +193,7 @@ function slideStyle(s: Slide) {
                 case 'Home': e.preventDefault(); goto(0); break;
                 case 'End': e.preventDefault(); goto(total - 1); break;
                 case 'o': case 'O': setOverview(!overview); break;
+                case 'p': case 'P': openPrint(); break;
                 case 'Enter': if (overview) { e.preventDefault(); setOverview(false); } break;
                 case 'Escape': if (overview) setOverview(false); break;
                 case 'f': case 'F':
@@ -194,10 +216,38 @@ function slideStyle(s: Slide) {
               if (e.clientX < window.innerWidth * 0.25) prev(); else next();
             });
 
+            // ── Print / PDF ──
+            // Under the mdslides dev server, generate a pixel-accurate PDF with
+            // headless Chrome (works identically in every browser). On a static
+            // deploy that endpoint is absent, so fall back to the browser's own
+            // Save-as-PDF on the /print route.
+            async function openPrint() {
+              const btn = document.getElementById('print-btn');
+              btn?.classList.add('busy');
+              try {
+                const res = await fetch('/__export.pdf');
+                if (res.ok && (res.headers.get('content-type') || '').includes('pdf')) {
+                  const url = URL.createObjectURL(await res.blob());
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = (document.title || 'slides') + '.pdf';
+                  document.body.appendChild(a);
+                  a.click();
+                  a.remove();
+                  setTimeout(() => URL.revokeObjectURL(url), 1000);
+                  return;
+                }
+              } catch {} finally {
+                btn?.classList.remove('busy');
+              }
+              window.open('/print/#print', '_blank');
+            }
+
             // ── Chrome buttons ──
             document.getElementById('next')?.addEventListener('click', next);
             document.getElementById('prev')?.addEventListener('click', prev);
             document.getElementById('overview-btn')?.addEventListener('click', () => setOverview(!overview));
+            document.getElementById('print-btn')?.addEventListener('click', openPrint);
             document.getElementById('fullscreen-btn')?.addEventListener('click', () => {
               if (document.fullscreenElement) document.exitFullscreen();
               else document.documentElement.requestFullscreen?.();
