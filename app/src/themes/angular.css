@@ -343,6 +343,17 @@ html.print, html.print body {
 }
 .print-deck { display: block; }
 .print-deck .slide { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+/* Gradient clip-to-text (-webkit-background-clip: text) doesn't survive PDF /
+   print rendering — the gradient paints as a filled box, so titles show up as
+   black/orange bars. Render headings as a clean solid color when printing. */
+html.print h1 {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  color: var(--accent);
+  -webkit-text-fill-color: var(--accent);
+}
 .print-bar {
   position: fixed; top: 16px; right: 16px; z-index: 100;
   display: flex; gap: 10px; align-items: center;
@@ -368,5 +379,12 @@ html.print, html.print body {
 @media print {
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   html, body { background: #000 !important; }
+  h1 {
+    background: none !important;
+    -webkit-background-clip: border-box !important;
+    background-clip: border-box !important;
+    color: var(--accent) !important;
+    -webkit-text-fill-color: var(--accent) !important;
+  }
   .chrome, .progress, .help, .print-bar { display: none !important; }
 }
