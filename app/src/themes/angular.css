@@ -234,8 +234,17 @@ hr { border: none; border-top: 1px solid var(--border); width: 100%; }
 }
 .chrome-bar .brand, .chrome-bar .controls { pointer-events: auto; }
 .brand { font-size: 14px; font-weight: 600; color: var(--text-dim); letter-spacing: .02em; }
-.controls { display: flex; align-items: center; gap: 6px; opacity: 0; transition: opacity .2s; }
-.deck:hover ~ .chrome .controls, .chrome:hover .controls { opacity: 1; }
+/* Bottom-right: only the slide count shows by default; the buttons fan out
+   when you hover the cluster. */
+.controls { display: flex; align-items: center; gap: 10px; }
+.ctl-group {
+  display: flex; align-items: center; gap: 6px;
+  max-width: 0; overflow: hidden; opacity: 0;
+  transform: translateX(8px);
+  transition: max-width .25s ease, opacity .2s ease, transform .25s ease;
+  pointer-events: none;
+}
+.controls:hover .ctl-group { max-width: 280px; opacity: 1; transform: none; pointer-events: auto; }
 .ctl {
   width: 32px; height: 32px;
   display: grid; place-items: center;

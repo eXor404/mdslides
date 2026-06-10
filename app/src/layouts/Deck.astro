@@ -68,12 +68,14 @@ function slideStyle(s: Slide) {
           <div class="chrome-bar">
             {brand && <span class="brand">{brand}</span>}
             <div class="controls">
-              <button class="ctl" id="prev" aria-label="Previous slide" title="Previous (←)">‹</button>
+              <div class="ctl-group">
+                <button class="ctl" id="prev" aria-label="Previous slide" title="Previous (←)">‹</button>
+                <button class="ctl" id="next" aria-label="Next slide" title="Next (→)">›</button>
+                <button class="ctl" id="overview-btn" aria-label="Overview" title="Overview (O)">▦</button>
+                <button class="ctl" id="fullscreen-btn" aria-label="Fullscreen" title="Fullscreen (F)">⤢</button>
+                <button class="ctl" id="theme-btn" aria-label="Toggle theme" title="Theme">◐</button>
+              </div>
               <span class="counter" id="counter">1 / {slides.length}</span>
-              <button class="ctl" id="next" aria-label="Next slide" title="Next (→)">›</button>
-              <button class="ctl" id="overview-btn" aria-label="Overview" title="Overview (O)">▦</button>
-              <button class="ctl" id="fullscreen-btn" aria-label="Fullscreen" title="Fullscreen (F)">⤢</button>
-              <button class="ctl" id="theme-btn" aria-label="Toggle theme" title="Theme">◐</button>
             </div>
           </div>
         </div>
