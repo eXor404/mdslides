@@ -1,0 +1,14 @@
+---
+import Deck from '../layouts/Deck.astro';
+import { loadSlides, loadDeckConfig, deckTitle } from '../lib/deck.js';
+
+const slides = await loadSlides();
+const config = await loadDeckConfig();
+const title = deckTitle(slides);
+---
+<Deck
+  title={title}
+  slides={slides}
+  transition={config.transition}
+  brand={config.brand?.text ?? ''}
+/>

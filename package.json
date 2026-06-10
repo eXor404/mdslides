@@ -1,0 +1,59 @@
+{
+  "name": "@exor404/mdslides",
+  "version": "0.1.0",
+  "description": "Drop a single markdown file, get a slide deck.",
+  "type": "module",
+  "bin": {
+    "mdslides": "./bin/cli.js"
+  },
+  "files": [
+    "bin",
+    "app/astro.config.mjs",
+    "app/package.json",
+    "app/integrations",
+    "app/public",
+    "app/src",
+    "LICENSE",
+    "README.md"
+  ],
+  "keywords": [
+    "markdown",
+    "slides",
+    "presentation",
+    "slideshow",
+    "deck",
+    "cli",
+    "zero-config",
+    "astro"
+  ],
+  "author": "eXor404 (https://github.com/eXor404)",
+  "license": "MIT",
+  "homepage": "https://github.com/eXor404/mdslides#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eXor404/mdslides.git"
+  },
+  "bugs": {
+    "url": "https://github.com/eXor404/mdslides/issues"
+  },
+  "scripts": {
+    "dev": "node bin/cli.js dev ./example/slides.md",
+    "build": "node bin/cli.js build ./example/slides.md",
+    "preview": "node bin/cli.js preview ./example/slides.md",
+    "export": "node bin/cli.js export ./example/slides.md"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "astro": "^6.2.1",
+    "katex": "^0.16.45",
+    "rehype-katex": "^7.0.1",
+    "rehype-stringify": "^10.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
+    "unified": "^11.0.5"
+  }
+}

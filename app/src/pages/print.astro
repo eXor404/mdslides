@@ -1,0 +1,11 @@
+---
+import Deck from '../layouts/Deck.astro';
+import { loadSlides, loadDeckConfig, deckTitle } from '../lib/deck.js';
+
+// One page per slide, all fragments shown — used by `mdslides export` (PDF)
+// and the browser's own "Save as PDF".
+const slides = await loadSlides();
+const config = await loadDeckConfig();
+const title = deckTitle(slides);
+---
+<Deck title={title} slides={slides} transition="none" brand={config.brand?.text ?? ''} print />

@@ -1,0 +1,231 @@
+---
+import '~theme';
+import 'katex/dist/katex.min.css';
+
+interface Slide {
+  html: string;
+  center?: boolean;
+  bg?: string | null;
+  classes?: string[];
+}
+
+interface Props {
+  title: string;
+  slides: Slide[];
+  transition?: string;
+  brand?: string;
+  print?: boolean;
+}
+
+const { title, slides, transition = 'fade', brand = '', print = false } = Astro.props;
+
+function slideClass(s: Slide) {
+  return ['slide', s.center ? 'is-center' : '', ...(s.classes ?? [])].filter(Boolean).join(' ');
+}
+function slideStyle(s: Slide) {
+  return s.bg ? `--slide-bg:${s.bg}` : undefined;
+}
+---
+<!doctype html>
+<html lang="en" data-transition={transition} class={print ? 'print' : undefined}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+  <body>
+    {print ? (
+      <div class="print-deck">
+        {slides.map((s) => (
+          <div class={slideClass(s)} style={slideStyle(s)}>
+            <div class="slide-inner" set:html={s.html} />
+          </div>
+        ))}
+      </div>
+    ) : (
+      <>
+        <div class="deck" id="deck">
+          <div class="stage" id="stage">
+            {slides.map((s, i) => (
+              <section
+                class={slideClass(s)}
+                style={slideStyle(s)}
+                data-index={i}
+                aria-hidden={i === 0 ? 'false' : 'true'}
+              >
+                <div class="slide-inner" set:html={s.html} />
+              </section>
+            ))}
+          </div>
+        </div>
+
+        <div class="chrome">
+          <div class="progress" id="progress"><span class="progress-bar" id="progress-bar"></span></div>
+          <div class="chrome-bar">
+            {brand && <span class="brand">{brand}</span>}
+            <div class="controls">
+              <button class="ctl" id="prev" aria-label="Previous slide" title="Previous (←)">‹</button>
+              <span class="counter" id="counter">1 / {slides.length}</span>
+              <button class="ctl" id="next" aria-label="Next slide" title="Next (→)">›</button>
+              <button class="ctl" id="overview-btn" aria-label="Overview" title="Overview (O)">▦</button>
+              <button class="ctl" id="fullscreen-btn" aria-label="Fullscreen" title="Fullscreen (F)">⤢</button>
+              <button class="ctl" id="theme-btn" aria-label="Toggle theme" title="Theme">◐</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="help" id="help" hidden>
+          <kbd>←</kbd><kbd>→</kbd> navigate · <kbd>O</kbd> overview · <kbd>F</kbd> fullscreen · <kbd>.</kbd> black · <kbd>?</kbd> help
+        </div>
+
+        <script is:inline>
+          (() => {
+            const stage = document.getElementById('stage');
+            const slides = [...document.querySelectorAll('.slide')];
+            const total = slides.length;
+            const counter = document.getElementById('counter');
+            const bar = document.getElementById('progress-bar');
+            const deck = document.getElementById('deck');
+            const help = document.getElementById('help');
+            if (!stage || total === 0) return;
+
+            const BASE_W = 1280, BASE_H = 720;
+            let cur = 0;       // current slide index
+            let frag = 0;      // fragments revealed on current slide
+            let overview = false;
+
+            const fragmentsOf = (i) => [...slides[i].querySelectorAll('.fragment')];
+
+            // ── Fit the fixed canvas into the viewport ──
+            function fit() {
+              const scale = Math.min(window.innerWidth / BASE_W, window.innerHeight / BASE_H);
+              stage.style.transform = `translate(-50%, -50%) scale(${scale})`;
+            }
+
+            // ── Render current state ──
+            function show() {
+              slides.forEach((s, i) => {
+                s.classList.toggle('active', i === cur);
+                s.setAttribute('aria-hidden', i === cur ? 'false' : 'true');
+                const dir = i < cur ? 'past' : i > cur ? 'future' : 'present';
+                s.dataset.state = dir;
+              });
+              const frags = fragmentsOf(cur);
+              frags.forEach((f, i) => f.classList.toggle('revealed', i < frag));
+              counter.textContent = `${cur + 1} / ${total}`;
+              bar.style.width = `${((cur + 1) / total) * 100}%`;
+              const hash = `#/${cur}`;
+              if (location.hash !== hash) history.replaceState(null, '', hash);
+            }
+
+            function goto(i, opts = {}) {
+              cur = Math.max(0, Math.min(total - 1, i));
+              frag = opts.endFragments ? fragmentsOf(cur).length : 0;
+              show();
+            }
+
+            function next() {
+              const frags = fragmentsOf(cur);
+              if (frag < frags.length) { frag++; show(); return; }
+              if (cur < total - 1) goto(cur + 1);
+            }
+            function prev() {
+              if (frag > 0) { frag--; show(); return; }
+              if (cur > 0) goto(cur - 1, { endFragments: true });
+            }
+
+            // ── Overview / grid ──
+            function setOverview(on) {
+              overview = on;
+              deck.classList.toggle('overview', on);
+              if (on) {
+                slides.forEach((s, i) => {
+                  s.onclick = () => { setOverview(false); goto(i); };
+                });
+              } else {
+                slides.forEach((s) => (s.onclick = null));
+                show();
+              }
+            }
+
+            // ── Black / pause ──
+            function toggleBlack() { document.body.classList.toggle('blacked'); }
+
+            // ── Keyboard ──
+            window.addEventListener('keydown', (e) => {
+              if (e.metaKey || e.ctrlKey || e.altKey) return;
+              switch (e.key) {
+                case 'ArrowRight': case ' ': case 'PageDown':
+                  e.preventDefault(); overview ? goto(cur + 1) : next(); if (overview) setOverview(false); break;
+                case 'ArrowLeft': case 'PageUp':
+                  e.preventDefault(); overview ? goto(cur - 1) : prev(); if (overview) setOverview(false); break;
+                case 'Home': e.preventDefault(); goto(0); break;
+                case 'End': e.preventDefault(); goto(total - 1); break;
+                case 'o': case 'O': setOverview(!overview); break;
+                case 'Escape': if (overview) setOverview(false); break;
+                case 'f': case 'F':
+                  if (document.fullscreenElement) document.exitFullscreen();
+                  else document.documentElement.requestFullscreen?.(); break;
+                case '.': toggleBlack(); break;
+                case '?': help.hidden = !help.hidden; break;
+              }
+            });
+
+            // ── Click zones (ignore links/buttons) ──
+            stage.addEventListener('click', (e) => {
+              if (overview) return;
+              if (e.target.closest('a, button')) return;
+              if (e.clientX < window.innerWidth * 0.25) prev(); else next();
+            });
+
+            // ── Chrome buttons ──
+            document.getElementById('next')?.addEventListener('click', next);
+            document.getElementById('prev')?.addEventListener('click', prev);
+            document.getElementById('overview-btn')?.addEventListener('click', () => setOverview(!overview));
+            document.getElementById('fullscreen-btn')?.addEventListener('click', () => {
+              if (document.fullscreenElement) document.exitFullscreen();
+              else document.documentElement.requestFullscreen?.();
+            });
+
+            // ── Theme toggle (light / dark) ──
+            (() => {
+              const root = document.documentElement;
+              if (localStorage.getItem('mdslides-theme') === 'light') root.setAttribute('data-theme', 'light');
+              document.getElementById('theme-btn')?.addEventListener('click', () => {
+                const light = root.getAttribute('data-theme') === 'light';
+                if (light) { root.removeAttribute('data-theme'); localStorage.setItem('mdslides-theme', 'dark'); }
+                else { root.setAttribute('data-theme', 'light'); localStorage.setItem('mdslides-theme', 'light'); }
+              });
+            })();
+
+            // ── Code copy ──
+            document.querySelectorAll('.slide pre').forEach((pre) => {
+              const btn = document.createElement('button');
+              btn.className = 'copy-btn'; btn.type = 'button'; btn.textContent = 'copy';
+              btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const code = pre.querySelector('code');
+                try {
+                  await navigator.clipboard.writeText((code ? code.innerText : pre.innerText).replace(/\n$/, ''));
+                  btn.textContent = 'copied'; setTimeout(() => (btn.textContent = 'copy'), 1200);
+                } catch {}
+              });
+              pre.appendChild(btn);
+            });
+
+            // ── Init: honor deep-link hash ──
+            const fromHash = () => {
+              const m = location.hash.match(/^#\/(\d+)/);
+              return m ? parseInt(m[1], 10) : 0;
+            };
+            window.addEventListener('resize', fit);
+            window.addEventListener('hashchange', () => { const i = fromHash(); if (i !== cur) goto(i); });
+            fit();
+            goto(fromHash());
+          })();
+        </script>
+      </>
+    )}
+  </body>
+</html>
