@@ -137,6 +137,35 @@ body.blacked .deck { opacity: 0; }
 }
 .slide.is-title .slide-inner > p:last-child strong { color: var(--text-muted); }
 
+/* ── Content slide: fixed top-left title, text left / media right ── */
+.slide.is-content .slide-inner { justify-content: flex-start; gap: 0; }
+.slide-head { flex: 0 0 auto; margin-bottom: 44px; }
+.slide-head h1 { font-size: 56px; text-align: left; }
+.slide-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: center;
+}
+.slide-body.no-media { grid-template-columns: 1fr; }
+.slide-body.media-only { grid-template-columns: 1fr; justify-items: center; }
+.col-left { align-self: center; display: flex; flex-direction: column; gap: 0.7em; min-width: 0; }
+.col-right {
+  align-self: center;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 20px;
+  min-width: 0; max-height: 100%;
+}
+.slide-body.no-media .col-left { max-width: 60ch; }
+.slide-body h2 { font-size: 34px; }
+.slide-body h3 { font-size: 27px; }
+.col-right :is(img, pre, table) { width: 100%; }
+.col-right img { max-height: 540px; object-fit: contain; }
+.col-right pre { font-size: 20px; }
+.col-right .katex-display { margin: 0; }
+
 /* ── Prose ── */
 .slide-inner > :first-child { margin-top: 0; }
 h1, h2, h3 { line-height: 1.08; letter-spacing: -0.02em; font-weight: 700; }

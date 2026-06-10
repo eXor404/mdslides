@@ -8,6 +8,7 @@ interface Slide {
   bg?: string | null;
   classes?: string[];
   title?: boolean;
+  content?: boolean;
 }
 
 interface Props {
@@ -21,7 +22,13 @@ interface Props {
 const { title, slides, transition = 'fade', brand = '', print = false } = Astro.props;
 
 function slideClass(s: Slide) {
-  return ['slide', s.title ? 'is-title' : '', s.center ? 'is-center' : '', ...(s.classes ?? [])]
+  return [
+    'slide',
+    s.title ? 'is-title' : '',
+    s.content ? 'is-content' : '',
+    s.center ? 'is-center' : '',
+    ...(s.classes ?? []),
+  ]
     .filter(Boolean)
     .join(' ');
 }

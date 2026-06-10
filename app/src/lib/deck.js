@@ -73,6 +73,67 @@ function rehypeFragments() {
   return (tree) => walk(tree, null);
 }
 
+// Content-slide layout: pull the heading into a fixed top-left header, then
+// split the body into a left column (prose / bullets) and a right column
+// (media — images, fenced code, tables, block math). Only runs when the
+// vfile is tagged `slideLayout: 'content'` (title / centered slides skip it).
+function hasClass(node, name) {
+  const c = node.properties?.className;
+  if (Array.isArray(c)) return c.includes(name);
+  if (typeof c === 'string') return c.split(/\s+/).includes(name);
+  return false;
+}
+function realChildren(node) {
+  return (node.children ?? []).filter((k) => !(k.type === 'text' && !k.value.trim()));
+}
+function isMedia(node) {
+  if (node.type !== 'element') return false;
+  const t = node.tagName;
+  if (t === 'img' || t === 'pre' || t === 'table' || t === 'figure') return true;
+  if (hasClass(node, 'math-display') || hasClass(node, 'katex-display')) return true;
+  // A paragraph whose sole content is an image or a block of display math.
+  if (t === 'p') {
+    const kids = realChildren(node);
+    if (kids.length === 1 && kids[0].type === 'element') {
+      const k = kids[0];
+      if (k.tagName === 'img') return true;
+      if (hasClass(k, 'math-display') || hasClass(k, 'katex-display')) return true;
+    }
+  }
+  return false;
+}
+function el(tagName, className, children) {
+  return { type: 'element', tagName, properties: { className }, children };
+}
+function rehypeSlideLayout() {
+  return (tree, file) => {
+    if (file?.data?.slideLayout !== 'content') return;
+    const kids = realChildren(tree);
+
+    let head = null;
+    const rest = [];
+    for (const n of kids) {
+      if (!head && n.type === 'element' && /^h[1-6]$/.test(n.tagName)) head = n;
+      else rest.push(n);
+    }
+
+    const left = [];
+    const right = [];
+    for (const n of rest) (isMedia(n) ? right : left).push(n);
+
+    const hasLeft = left.length > 0;
+    const hasRight = right.length > 0;
+    const variant = hasLeft && hasRight ? 'has-media' : hasRight ? 'media-only' : 'no-media';
+
+    const cols = [];
+    if (hasLeft || !hasRight) cols.push(el('div', ['col-left'], left));
+    if (hasRight) cols.push(el('div', ['col-right'], right));
+    const body = el('div', ['slide-body', variant], cols);
+
+    tree.children = head ? [el('header', ['slide-head'], [head]), body] : [body];
+  };
+}
+
 const processor = unified()
   .use(remarkParse)
   .use(remarkGfm)
@@ -82,10 +143,11 @@ const processor = unified()
   .use(remarkRehype)
   .use(rehypeKatex)
   .use(rehypeFragments)
+  .use(rehypeSlideLayout)
   .use(rehypeStringify);
 
-async function renderMarkdown(md) {
-  const file = await processor.process(md);
+async function renderMarkdown(md, layout) {
+  const file = await processor.process({ value: md, data: { slideLayout: layout } });
   return String(file);
 }
 
@@ -167,11 +229,14 @@ export async function loadSlides() {
     const { directives, body } = extractDirectives(chunks[i]);
     // `{{date}}` → today's date (any slide).
     const withDate = body.replace(/\{\{\s*date\s*\}\}/g, today);
-    const html = await renderMarkdown(withDate);
     // The first slide is the presentation title slide by default; opt out
     // with `<!-- slide: plain -->`, or force elsewhere with `title`.
     const isTitle = directives.title || (i === 0 && !directives.plain);
-    slides.push({ html, ...directives, title: isTitle });
+    // Everything that isn't a title or an explicitly centered slide gets the
+    // structured content layout (top-left title + text-left / media-right).
+    const isContent = !isTitle && !directives.center;
+    const html = await renderMarkdown(withDate, isContent ? 'content' : 'plain');
+    slides.push({ html, ...directives, title: isTitle, content: isContent });
   }
   return slides;
 }
