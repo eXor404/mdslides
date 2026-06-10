@@ -37,10 +37,10 @@
     "url": "https://github.com/eXor404/mdslides/issues"
   },
   "scripts": {
-    "dev": "node bin/cli.js dev ./example/slides.md",
-    "build": "node bin/cli.js build ./example/slides.md",
-    "preview": "node bin/cli.js preview ./example/slides.md",
-    "export": "node bin/cli.js export ./example/slides.md"
+    "dev": "node bin/cli.js dev ./example",
+    "build": "node bin/cli.js build ./example",
+    "preview": "node bin/cli.js preview ./example",
+    "export": "node bin/cli.js export ./example"
   },
   "engines": {
     "node": ">=18"

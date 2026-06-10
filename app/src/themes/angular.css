@@ -99,6 +99,7 @@ body.blacked .deck { opacity: 0; }
 [data-transition="slide"] .slide[data-state="past"] { transform: translateX(-60px); }
 
 .slide-inner {
+  position: relative;
   width: 100%;
   height: 100%;
   padding: 72px 92px;
@@ -108,6 +109,33 @@ body.blacked .deck { opacity: 0; }
   gap: 0.7em;
 }
 .slide.is-center .slide-inner { align-items: center; text-align: center; }
+
+/* ── Title slide ── */
+.slide.is-title .slide-inner {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.35em;
+}
+.slide.is-title h1 { font-size: 96px; line-height: 1.04; }
+.slide.is-title h2 {
+  font-size: 34px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--text-muted);
+  max-width: 22ch;
+}
+/* Last line = byline (presenters · date), pinned to the bottom. */
+.slide.is-title .slide-inner > p:last-child {
+  position: absolute;
+  left: 92px;
+  right: 92px;
+  bottom: 64px;
+  margin: 0;
+  font-size: 24px;
+  color: var(--text-dim);
+}
+.slide.is-title .slide-inner > p:last-child strong { color: var(--text-muted); }
 
 /* ── Prose ── */
 .slide-inner > :first-child { margin-top: 0; }

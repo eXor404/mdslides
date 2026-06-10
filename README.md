@@ -3,8 +3,8 @@
 > Drop a single markdown file, get a slide deck.
 
 The slides sibling of [mdstack](https://github.com/eXor404/mdstack). Point it
-at one `.md` file and `mdslides` either presents it in a dev server or builds a
-self-contained `dist/` you can host anywhere static.
+at a folder — `mdslides` scaffolds a starter `slides.md`, then presents it in a
+dev server or builds a self-contained `dist/` you can host anywhere static.
 
 > **Status:** pre-1.0, provisional. CLI flags and markdown conventions may
 > change before `0.x → 1.0`.
@@ -12,33 +12,52 @@ self-contained `dist/` you can host anywhere static.
 ## Quick start
 
 ```bash
-mdslides ./slides.md          # present (dev server, live-reload)
-mdslides build ./slides.md    # static build → ./dist/
-mdslides preview ./slides.md  # serve the built dist/
-mdslides export ./slides.md   # → slides.pdf (one page per slide)
+mkdir my-talk
+mdslides ./my-talk            # creates my-talk/slides.md and presents it
 ```
 
-Try the example:
+`mdslides` drops a starter `slides.md` (title, subtitle, presenter, date) into
+the folder and opens the dev server. Edit the file and the deck live-reloads.
+
+```bash
+mdslides ./my-talk            # present (dev server, live-reload)
+mdslides build ./my-talk      # static build → ./my-talk/dist/
+mdslides preview ./my-talk    # serve the built dist/
+mdslides export ./my-talk     # → slides.pdf (one page per slide)
+```
+
+You can also point straight at a file: `mdslides ./my-talk/slides.md`.
+
+Try the bundled example:
 
 ```bash
 npm install
-npm run dev        # opens example/slides.md
+npm run dev        # opens ./example
 ```
 
 ## The deck model
 
-**One `.md` file is the whole deck.** Every `#` (H1) heading starts a new
+**One `slides.md` file is the whole deck.** Every `#` (H1) heading starts a new
 slide — write plain markdown in between. A standalone `---` line is an
 explicit break (for a slide with no heading, or to split one section).
 
 ```markdown
-# Title slide
-A one-line hook.
+# Presentation title
+## A subtitle
+**Your Name** · {{date}}
 
 # Second slide
 - a point
 - another {.fragment}
 ```
+
+### Title slide
+
+The **first slide is the title slide** automatically: the `#` renders large,
+`##` is the subtitle, and the last line becomes a byline pinned to the bottom —
+write your presenter name(s) in markdown there. The `{{date}}` token resolves to
+today's date. Opt a slide out with `<!-- slide: plain -->`, or mark another
+slide as a title with `<!-- slide: title -->`.
 
 ## Supported markdown (the lean subset)
 

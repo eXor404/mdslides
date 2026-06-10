@@ -90,19 +90,32 @@ async function renderMarkdown(md) {
 }
 
 // Per-slide directive: `<!-- slide: center bg=#0d0d0d -->`.
-// Supported tokens: `center`, `bg=<color|url(...)>`, `class=<name>`.
+// Supported tokens: `title`, `plain`, `center`, `bg=<color|url(...)>`,
+// `class=<name>`.
 function extractDirectives(chunk) {
-  const directives = { center: false, bg: null, classes: [] };
+  const directives = { center: false, bg: null, classes: [], title: false, plain: false };
   const stripped = chunk.replace(/<!--\s*slide:([^>]*?)-->\s*/i, (_m, body) => {
     for (const tok of body.trim().split(/\s+/)) {
       if (!tok) continue;
       if (tok === 'center') directives.center = true;
+      else if (tok === 'title') directives.title = true;
+      else if (tok === 'plain') directives.plain = true;
       else if (tok.startsWith('bg=')) directives.bg = tok.slice(3);
       else if (tok.startsWith('class=')) directives.classes.push(tok.slice(6));
     }
     return '';
   });
   return { directives, body: stripped };
+}
+
+// Today's date, e.g. "June 10, 2026". Computed per run (dev reloads pick up
+// the current day; a static build freezes it at build time).
+function todayLong() {
+  return new Date().toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 }
 
 // Split the deck into slides. A new slide starts at every `#` (H1) heading.
@@ -146,13 +159,19 @@ export async function loadSlides() {
     throw new Error('MD_FILE not set — run mdslides via the CLI (e.g. `npx mdslides ./slides.md`).');
   }
   const src = readFileSync(deckFile, 'utf8');
+  const today = todayLong();
   const chunks = splitSlides(src);
 
   const slides = [];
-  for (const chunk of chunks) {
-    const { directives, body } = extractDirectives(chunk);
-    const html = await renderMarkdown(body);
-    slides.push({ html, ...directives });
+  for (let i = 0; i < chunks.length; i++) {
+    const { directives, body } = extractDirectives(chunks[i]);
+    // `{{date}}` → today's date (any slide).
+    const withDate = body.replace(/\{\{\s*date\s*\}\}/g, today);
+    const html = await renderMarkdown(withDate);
+    // The first slide is the presentation title slide by default; opt out
+    // with `<!-- slide: plain -->`, or force elsewhere with `title`.
+    const isTitle = directives.title || (i === 0 && !directives.plain);
+    slides.push({ html, ...directives, title: isTitle });
   }
   return slides;
 }

@@ -7,6 +7,7 @@ interface Slide {
   center?: boolean;
   bg?: string | null;
   classes?: string[];
+  title?: boolean;
 }
 
 interface Props {
@@ -20,7 +21,9 @@ interface Props {
 const { title, slides, transition = 'fade', brand = '', print = false } = Astro.props;
 
 function slideClass(s: Slide) {
-  return ['slide', s.center ? 'is-center' : '', ...(s.classes ?? [])].filter(Boolean).join(' ');
+  return ['slide', s.title ? 'is-title' : '', s.center ? 'is-center' : '', ...(s.classes ?? [])]
+    .filter(Boolean)
+    .join(' ');
 }
 function slideStyle(s: Slide) {
   return s.bg ? `--slide-bg:${s.bg}` : undefined;

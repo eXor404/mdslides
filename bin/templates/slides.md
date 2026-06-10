@@ -1,12 +1,12 @@
-# Your deck title
+# Your presentation title
 
-A subtitle or one-line hook.
+## A subtitle that frames the talk
 
-Press **→** to begin · **O** for overview · **F** for fullscreen.
+**Your Name** · {{date}}
 
-# A content slide
+# First slide
 
-Every `#` heading starts a new slide.
+Every `#` heading starts a new slide. Write plain markdown in between.
 
 - A point
 - Another point {.fragment}
@@ -22,4 +22,4 @@ You get **bold**, *italic*, ~~strike~~, ==highlight==, `code`, and math: $e^{i\p
 
 <!-- slide: center -->
 
-Edit `slides.md` and the deck reloads.
+Edit this file and the deck reloads.

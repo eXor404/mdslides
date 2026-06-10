@@ -1,10 +1,8 @@
 # mdslides
 
-### Drop one markdown file. Get a slide deck.
+## Drop a folder. Get a slide deck.
 
-A zero-config presentation CLI — the slides sibling of **mdstack**.
-
-<!-- slide: center -->
+**Maurice Däppen** · {{date}}
 
 # How it works
 

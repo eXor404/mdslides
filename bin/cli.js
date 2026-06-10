@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, resolve, isAbsolute, relative, basename, extname } from 'node:path';
-import { existsSync, statSync, writeFileSync, readFileSync } from 'node:fs';
+import { existsSync, statSync, writeFileSync, readFileSync, mkdirSync } from 'node:fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -59,31 +59,28 @@ function parseArgs(argv) {
   }
 
   if (!file) {
-    fail('Missing markdown file.\nUsage: mdslides [dev|build|preview|export] [--theme <name>] <file.md>');
+    fail('Missing target.\nUsage: mdslides [dev|build|preview|export] [--theme <name>] <folder|file.md>');
   }
 
   return { cmd, theme, file };
 }
 
-// Accepts a .md file, or a folder (then looks for slides.md / index.md).
+// The primary model: point at a (usually empty) folder. mdslides looks for
+// slides.md / index.md, and scaffolds a starter slides.md if there's none.
+// A direct path to a .md file is also accepted.
 function resolveDeck(input) {
   let abs = isAbsolute(input) ? input : resolve(process.cwd(), input);
 
   if (existsSync(abs) && statSync(abs).isDirectory()) {
     const candidates = ['slides.md', 'index.md'];
     const found = candidates.map((c) => resolve(abs, c)).find((p) => existsSync(p));
-    if (found) {
-      abs = found;
-    } else {
-      // Scaffold a starter deck inside the folder.
-      abs = resolve(abs, 'slides.md');
-      scaffoldDeck(abs);
-    }
+    abs = found ?? scaffoldDeck(resolve(abs, 'slides.md'));
   } else if (!existsSync(abs)) {
-    if (extname(abs).toLowerCase() !== '.md') {
-      fail(`Not a markdown file: ${abs}`);
-    }
-    scaffoldDeck(abs);
+    // A non-existent path: treat as a .md file to create, or a folder to
+    // create a deck in if it has no .md extension.
+    abs = extname(abs).toLowerCase() === '.md'
+      ? scaffoldDeck(abs)
+      : scaffoldDeck(resolve(abs, 'slides.md'));
   }
 
   if (!existsSync(abs) || !statSync(abs).isFile()) {
@@ -95,10 +92,12 @@ function resolveDeck(input) {
 function scaffoldDeck(deckPath) {
   const templatePath = resolve(__dirname, 'templates', 'slides.md');
   try {
+    mkdirSync(dirname(deckPath), { recursive: true });
     const content = readFileSync(templatePath, 'utf8');
     writeFileSync(deckPath, content, 'utf8');
     const rel = relative(process.cwd(), deckPath) || deckPath;
-    console.log(`mdslides: created ${rel} — edit it, then re-run`);
+    console.log(`mdslides: created ${rel} — edit the title, subtitle, presenter and date, then it reloads`);
+    return deckPath;
   } catch (err) {
     fail(`couldn't create a starter deck: ${err.message}`);
   }
