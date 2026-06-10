@@ -310,17 +310,21 @@ hr { border: none; border-top: 1px solid var(--border); width: 100%; }
   padding: 44px;
 }
 .deck.overview .slide {
+  display: block;               /* drop the flex context so the inner can't shrink */
   position: relative; inset: auto;
+  flex: 0 0 auto;
   width: 320px; height: 180px;
-  opacity: 1; visibility: visible; pointer-events: auto;
+  opacity: 1 !important; visibility: visible !important; pointer-events: auto;
+  transform: none !important;   /* override transition transforms */
   overflow: hidden; cursor: pointer;
   border: 2px solid var(--border);
   border-radius: 10px;
-  transition: border-color .15s, transform .15s;
+  transition: border-color .15s;
 }
-.deck.overview .slide:hover { transform: translateY(-3px); border-color: var(--border-strong); }
+.deck.overview .slide:hover { border-color: var(--border-strong); }
 .deck.overview .slide.active { border-color: var(--accent); }
 .deck.overview .slide-inner {
+  flex: none; flex-shrink: 0;
   width: var(--canvas-w); height: var(--canvas-h);
   transform: scale(0.25); transform-origin: top left;
 }

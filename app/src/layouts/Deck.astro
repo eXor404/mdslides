@@ -129,6 +129,7 @@ function slideStyle(s: Slide) {
               bar.style.width = `${((cur + 1) / total) * 100}%`;
               const hash = `#/${cur}`;
               if (location.hash !== hash) history.replaceState(null, '', hash);
+              if (overview) slides[cur].scrollIntoView({ block: 'nearest' });
             }
 
             function goto(i, opts = {}) {
@@ -148,17 +149,13 @@ function slideStyle(s: Slide) {
             }
 
             // ── Overview / grid ──
+            // Selection happens in the single stage click handler below — no
+            // per-slide onclick (which used to flip `overview` mid-bubble and
+            // make the stage handler advance an extra slide).
             function setOverview(on) {
               overview = on;
               deck.classList.toggle('overview', on);
-              if (on) {
-                slides.forEach((s, i) => {
-                  s.onclick = () => { setOverview(false); goto(i); };
-                });
-              } else {
-                slides.forEach((s) => (s.onclick = null));
-                show();
-              }
+              show();
             }
 
             // ── Black / pause ──
@@ -169,12 +166,13 @@ function slideStyle(s: Slide) {
               if (e.metaKey || e.ctrlKey || e.altKey) return;
               switch (e.key) {
                 case 'ArrowRight': case ' ': case 'PageDown':
-                  e.preventDefault(); overview ? goto(cur + 1) : next(); if (overview) setOverview(false); break;
+                  e.preventDefault(); overview ? goto(cur + 1) : next(); break;
                 case 'ArrowLeft': case 'PageUp':
-                  e.preventDefault(); overview ? goto(cur - 1) : prev(); if (overview) setOverview(false); break;
+                  e.preventDefault(); overview ? goto(cur - 1) : prev(); break;
                 case 'Home': e.preventDefault(); goto(0); break;
                 case 'End': e.preventDefault(); goto(total - 1); break;
                 case 'o': case 'O': setOverview(!overview); break;
+                case 'Enter': if (overview) { e.preventDefault(); setOverview(false); } break;
                 case 'Escape': if (overview) setOverview(false); break;
                 case 'f': case 'F':
                   if (document.fullscreenElement) document.exitFullscreen();
@@ -186,7 +184,12 @@ function slideStyle(s: Slide) {
 
             // ── Click zones (ignore links/buttons) ──
             stage.addEventListener('click', (e) => {
-              if (overview) return;
+              if (overview) {
+                const sec = e.target.closest('.slide');
+                const i = sec ? slides.indexOf(sec) : -1;
+                if (i >= 0) { setOverview(false); goto(i); }
+                return;
+              }
               if (e.target.closest('a, button')) return;
               if (e.clientX < window.innerWidth * 0.25) prev(); else next();
             });
