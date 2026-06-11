@@ -147,33 +147,66 @@ fragments shown). It uses [Playwright](https://playwright.dev) if installed
 Releases go to the **public npm registry** (npmjs.com), so anyone can
 `npx @exor404/mdslides`. A tag-triggered GitHub Actions pipeline
 ([`.github/workflows/package-publish.yml`](.github/workflows/package-publish.yml))
-publishes via **OIDC Trusted Publishing** — GitHub mints a one-time identity
-token for the run, so **no npm token or secret is ever stored**.
+does the publishing for you: it runs **only when you push a `v*` tag**, verifies
+the tag matches `package.json`, and runs `npm publish` against npmjs.com using an
+automation token stored as the `NPM_TOKEN` repository secret.
 
-**One-time setup** (needed once, because Trusted Publishing attaches to an
-existing package):
+### How the pipeline works
 
-```bash
-npm login                       # browser sign-in to npmjs.com
-npm publish --access public     # publish the first version by hand
+```
+push tag v0.1.2 ──► GitHub Actions ──► checkout ──► setup Node 22
+                                          │
+                                          ├─ guard: tag (v0.1.2) must equal
+                                          │   package.json "version" (0.1.2),
+                                          │   else the run fails
+                                          │
+                                          └─ npm publish  (auth: NPM_TOKEN)
+                                                  └──► npmjs.com
 ```
 
-Then on npmjs.com open the package → **Settings → Trusted Publisher → GitHub
-Actions** and register:
+The version guard means the git tag and the published version can never drift —
+if they disagree, the run stops before publishing.
 
-- **Repository:** `eXor404/mdslides`
-- **Workflow filename:** `package-publish.yml`
+### One-time setup
 
-After that, every release is automatic:
+You only do this once. It wires an npm token into the repo so Actions can publish
+on your behalf.
+
+1. **Create an npm automation token.** On npmjs.com: avatar → **Access Tokens** →
+   **Generate New Token** → **Automation** (or a **Granular** token scoped to the
+   `@exor404/mdslides` package with **Read and write**). Copy the value — npm
+   shows it only once.
+2. **Add it to GitHub as a secret.** Repo → **Settings** → **Secrets and
+   variables** → **Actions** → **New repository secret**. Name it exactly
+   `NPM_TOKEN`, paste the token, **Add secret**. (It's a *secret*, not a
+   *variable* — secrets are encrypted and hidden from logs.)
+
+> The very first version must exist on npm before automation can update it.
+> If the package isn't published yet, do one manual publish first:
+> `npm login && npm publish --access public`.
+
+### Cutting a release
+
+Once the secret is in place, every release is three commands:
 
 ```bash
-npm version patch          # bumps package.json (0.1.0 → 0.1.1) and tags v0.1.1
+npm version patch          # bumps package.json (0.1.1 → 0.1.2) and commits + tags v0.1.2
 git push origin main       # push the version-bump commit
-git push origin v0.1.1     # push the tag → the pipeline publishes, tokenlessly
+git push origin v0.1.2     # push the tag → the pipeline publishes
 ```
 
-`npm version` creates the matching `vX.Y.Z` tag for you. The workflow refuses
-to publish if the tag and `package.json` version disagree, so they can't drift.
+`npm version patch` (or `minor` / `major`) bumps `package.json`, makes the commit,
+and creates the matching `vX.Y.Z` tag in one step. Pushing that tag is what
+triggers the workflow. Watch it run under the repo's **Actions** tab; when it goes
+green the new version is live on npm.
+
+**Prefer to bump by hand?** Edit `"version"` in `package.json`, then:
+
+```bash
+git commit -am "🔖 Release 0.1.2"
+git tag v0.1.2             # must match package.json exactly, or the guard fails
+git push && git push --tags
+```
 
 ## Requirements
 

@@ -1,14 +1,14 @@
 name: Publish Package
 
-# Tag-triggered release pipeline: it runs only when you push a version tag,
-# then publishes to the public npm registry (npmjs.com) via OIDC Trusted
-# Publishing — no token or secret is stored anywhere. GitHub mints a one-time
-# identity token (`id-token: write`) that npm trusts because this repo +
-# workflow are registered as a Trusted Publisher on the package.
+# Tag-triggered release pipeline: it runs only when you push a version tag
+# (e.g. v0.1.2), then publishes to the public npm registry (npmjs.com) using
+# an automation token stored as the `NPM_TOKEN` repository secret.
 #
 # One-time setup (see the README "Releasing" section):
-#   1. Publish the first version manually (npm login && npm publish).
-#   2. On npmjs.com, add this repo + workflow as the package's Trusted Publisher.
+#   1. On npmjs.com: Account -> Access Tokens -> Generate New Token ->
+#      "Automation" (or a Granular token with read+write on this package).
+#   2. In GitHub: repo -> Settings -> Secrets and variables -> Actions ->
+#      New repository secret. Name it NPM_TOKEN and paste the token value.
 # After that, pushing a v* tag publishes automatically.
 on:
   push:
@@ -17,9 +17,6 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write   # required for OIDC trusted publishing
 
     steps:
       - name: Checkout repository
@@ -30,9 +27,6 @@ jobs:
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
-
-      - name: Use an npm that supports trusted publishing (>= 11.5.1)
-        run: npm install -g npm@latest
 
       - name: Guard — tag must match package.json version
         run: |
@@ -45,3 +39,5 @@ jobs:
 
       - name: Publish to npm
         run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
