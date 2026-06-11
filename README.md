@@ -1,6 +1,6 @@
 # mdslides
 
-> Drop a single markdown file, get a slide deck.
+> Markdown in, presentation out.
 
 The slides sibling of [mdstack](https://github.com/eXor404/mdstack). Point it
 at a folder — `mdslides` scaffolds a starter `slides.md`, then presents it in a

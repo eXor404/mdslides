@@ -1,7 +1,7 @@
 {
   "name": "@exor404/mdslides",
   "version": "0.1.0",
-  "description": "Drop a single markdown file, get a slide deck.",
+  "description": "Markdown in, presentation out.",
   "type": "module",
   "bin": {
     "mdslides": "./bin/cli.js"

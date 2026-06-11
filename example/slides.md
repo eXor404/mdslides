@@ -1,8 +1,8 @@
 # mdslides
 
-## Drop a folder. Get a slide deck.
+## Markdown in, presentation out.
 
-**Maurice Däppen** · {{date}}
+**Your Name** · {{date}}
 
 # How it works
 
@@ -24,15 +24,15 @@ Drive the deck from the keyboard:
 | `F` | fullscreen |
 | `.` | black screen |
 
-# Fragments
+# Reveal & motion
 
-Reveal points one press at a time:
+Everything fades in when the slide opens — then:
 
-- First this shows {.fragment}
-- ==then this== {.fragment}
-- and finally **this** {.fragment}
+- Bullets reveal **one press at a time**
+- This is automatic — ==no markup needed==
+- `←` steps back, `→` `space` go forward
 
-Add `{.fragment}` to any line.
+Need another line to wait? Add `{.fragment}`. {.fragment}
 
 # The lean subset
 
@@ -40,7 +40,7 @@ Only the things slides actually need:
 
 - **bold**, *italic*, ~~strike~~, ==highlight==
 - lists, tables, blockquotes
-- `inline code` and fenced blocks
+- `inline code` and syntax-highlighted blocks
 - images
 
 ```js
