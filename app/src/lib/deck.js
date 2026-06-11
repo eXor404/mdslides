@@ -9,6 +9,7 @@ import remarkRehype from 'remark-rehype';
 import rehypeKatex from 'rehype-katex';
 import rehypeStringify from 'rehype-stringify';
 import remarkHighlight from '../../integrations/remark-highlight.js';
+import rehypeShiki from '../../integrations/rehype-shiki.js';
 
 const DEFAULT_CONFIG = {
   brand: { text: 'mdslides' },
@@ -160,6 +161,7 @@ const processor = unified()
   .use(remarkImagePaths)
   .use(remarkRehype)
   .use(rehypeKatex)
+  .use(rehypeShiki)
   .use(rehypeFragments)
   .use(rehypeListFragments)
   .use(rehypeSlideLayout)
