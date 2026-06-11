@@ -1,8 +1,15 @@
 name: Publish Package
 
 # Tag-triggered release pipeline: it runs only when you push a version tag,
-# then publishes the package to the public npm registry (npmjs.com) — the same
-# place mdstack lives. Needs an NPM_TOKEN repo secret (an npm automation token).
+# then publishes to the public npm registry (npmjs.com) via OIDC Trusted
+# Publishing — no token or secret is stored anywhere. GitHub mints a one-time
+# identity token (`id-token: write`) that npm trusts because this repo +
+# workflow are registered as a Trusted Publisher on the package.
+#
+# One-time setup (see the README "Releasing" section):
+#   1. Publish the first version manually (npm login && npm publish).
+#   2. On npmjs.com, add this repo + workflow as the package's Trusted Publisher.
+# After that, pushing a v* tag publishes automatically.
 on:
   push:
     tags: [ 'v*' ]
@@ -10,6 +17,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write   # required for OIDC trusted publishing
 
     steps:
       - name: Checkout repository
@@ -21,8 +31,8 @@ jobs:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Use an npm that supports trusted publishing (>= 11.5.1)
+        run: npm install -g npm@latest
 
       - name: Guard — tag must match package.json version
         run: |
@@ -34,6 +44,4 @@ jobs:
           fi
 
       - name: Publish to npm
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish

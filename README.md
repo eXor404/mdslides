@@ -144,22 +144,32 @@ fragments shown). It uses [Playwright](https://playwright.dev) if installed
 
 ## Releasing
 
-Releases are automated by a tag-triggered GitHub Actions pipeline
-([`.github/workflows/package-publish.yml`](.github/workflows/package-publish.yml)).
-Pushing a `v*` tag publishes the package to the **public npm registry**
-(npmjs.com), so anyone can `npx @exor404/mdslides`.
+Releases go to the **public npm registry** (npmjs.com), so anyone can
+`npx @exor404/mdslides`. A tag-triggered GitHub Actions pipeline
+([`.github/workflows/package-publish.yml`](.github/workflows/package-publish.yml))
+publishes via **OIDC Trusted Publishing** — GitHub mints a one-time identity
+token for the run, so **no npm token or secret is ever stored**.
 
-**One-time setup:** create an npm **automation** access token
-(npmjs.com → *Access Tokens* → *Generate New Token* → *Automation*) and add it
-to the repo as a secret named **`NPM_TOKEN`**
-(*Settings → Secrets and variables → Actions → New repository secret*).
-
-To cut a release:
+**One-time setup** (needed once, because Trusted Publishing attaches to an
+existing package):
 
 ```bash
-npm version patch          # bumps package.json (0.1.0 → 0.1.1) and commits
+npm login                       # browser sign-in to npmjs.com
+npm publish --access public     # publish the first version by hand
+```
+
+Then on npmjs.com open the package → **Settings → Trusted Publisher → GitHub
+Actions** and register:
+
+- **Repository:** `eXor404/mdslides`
+- **Workflow filename:** `package-publish.yml`
+
+After that, every release is automatic:
+
+```bash
+npm version patch          # bumps package.json (0.1.0 → 0.1.1) and tags v0.1.1
 git push origin main       # push the version-bump commit
-git push origin v0.1.1     # push the tag → the pipeline publishes
+git push origin v0.1.1     # push the tag → the pipeline publishes, tokenlessly
 ```
 
 `npm version` creates the matching `vX.Y.Z` tag for you. The workflow refuses
