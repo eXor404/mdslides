@@ -10,9 +10,15 @@ name: Publish Package
 #   2. In GitHub: repo -> Settings -> Secrets and variables -> Actions ->
 #      New repository secret. Name it NPM_TOKEN and paste the token value.
 # After that, pushing a v* tag publishes automatically.
+#
+# Website releases use `web-v*` tags and are handled by website-publish.yml.
+# The `!web-v*` exclusion below keeps this package publish from firing on a
+# website release tag.
 on:
   push:
-    tags: [ 'v*' ]
+    tags:
+      - 'v*'
+      - '!web-v*'
 
 jobs:
   publish:
