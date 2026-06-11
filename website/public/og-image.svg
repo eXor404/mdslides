@@ -15,11 +15,12 @@
   <rect width="1200" height="630" fill="#0d0d0d"/>
   <rect width="1200" height="630" fill="url(#glow)"/>
 
-  <!-- Logomark -->
+  <!-- Logomark — black bubble with gradient slide lines, scaled from the 28×28 favicon -->
   <g transform="translate(80,80)">
-    <rect width="80" height="80" rx="20" fill="url(#grad)"/>
-    <rect x="11" y="11" width="58" height="58" rx="11" fill="#0d0d0d"/>
-    <path d="M40 18 L62 40 L40 62 L18 40 Z" fill="url(#grad)"/>
+    <rect width="80" height="80" rx="20" fill="#0d0d0d" stroke="rgba(255,255,255,0.08)"/>
+    <rect x="20" y="25.7" width="40" height="7.4" rx="3.7" fill="url(#grad)"/>
+    <rect x="20" y="37.7" width="40" height="7.4" rx="3.7" fill="url(#grad)"/>
+    <rect x="20" y="49.7" width="25.7" height="7.4" rx="3.7" fill="url(#grad)"/>
   </g>
 
   <!-- Wordmark -->
