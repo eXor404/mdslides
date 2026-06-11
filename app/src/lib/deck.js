@@ -73,6 +73,24 @@ function rehypeFragments() {
   return (tree) => walk(tree, null);
 }
 
+// Every list item is a fragment by default: lists start hidden when the slide
+// opens and reveal one bullet at a time on Space / →, reusing the same
+// `.fragment` machinery as manual `{.fragment}` markers.
+function addClass(node, name) {
+  const props = (node.properties ||= {});
+  const cls = props.className;
+  if (Array.isArray(cls)) { if (!cls.includes(name)) cls.push(name); }
+  else if (cls) { if (cls !== name) props.className = [cls, name]; }
+  else props.className = [name];
+}
+function rehypeListFragments() {
+  const walk = (node) => {
+    if (node.type === 'element' && node.tagName === 'li') addClass(node, 'fragment');
+    if (Array.isArray(node.children)) node.children.forEach(walk);
+  };
+  return (tree) => walk(tree);
+}
+
 // Content-slide layout: pull the heading into a fixed top-left header, then
 // split the body into a left column (prose / bullets) and a right column
 // (media — images, fenced code, tables, block math). Only runs when the
@@ -143,6 +161,7 @@ const processor = unified()
   .use(remarkRehype)
   .use(rehypeKatex)
   .use(rehypeFragments)
+  .use(rehypeListFragments)
   .use(rehypeSlideLayout)
   .use(rehypeStringify);
 
