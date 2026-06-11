@@ -117,7 +117,7 @@ body.blacked .deck { opacity: 0; }
   text-align: center;
   gap: 0.35em;
 }
-.slide.is-title h1 { font-size: 96px; line-height: 1.04; }
+.slide.is-title h1 { font-size: 96px; line-height: 1.12; }
 .slide.is-title h2 {
   font-size: 34px;
   font-weight: 500;
@@ -178,6 +178,10 @@ h1 {
      unsupported (notably some print/PDF engines). */
   color: var(--accent);
   -webkit-text-fill-color: transparent;
+  /* clip-to-text crops the gradient to the line box, so a tight line-height
+     shears off descenders (the tail of g/y/p). Give the box headroom. */
+  line-height: 1.18;
+  padding-bottom: 0.08em;
 }
 h2 { font-size: 52px; }
 h3 { font-size: 38px; color: var(--text-muted); font-weight: 600; }
