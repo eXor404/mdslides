@@ -36,6 +36,9 @@
   "bugs": {
     "url": "https://github.com/eXor404/mdslides/issues"
   },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "scripts": {
     "dev": "node bin/cli.js dev ./example",
     "build": "node bin/cli.js build ./example",
@@ -54,6 +57,7 @@
     "remark-math": "^6.0.0",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",
+    "shiki": "^4.2.0",
     "unified": "^11.0.5"
   }
 }
