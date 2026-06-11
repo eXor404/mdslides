@@ -1,0 +1,5 @@
+# Only ship the built static site + nginx config to the image build context.
+*
+!dist
+!nginx.conf
+!Dockerfile

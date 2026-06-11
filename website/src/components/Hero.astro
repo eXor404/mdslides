@@ -1,0 +1,189 @@
+---
+import InstallCard from './InstallCard.astro';
+import ArrowRight from './icons/ArrowRight.astro';
+import Star from './icons/Star.astro';
+import { HERO_INSTALL_TABS } from '../lib/install-tabs';
+import { REPO_URL } from '../lib/links';
+import { getNpmVersion } from '../lib/version';
+
+const version = getNpmVersion();
+---
+
+<section id="hero" class="hero">
+  <div class="hero-glow" aria-hidden="true"></div>
+
+  <div class="hero-inner container" data-reveal-load>
+    <h1 class="hero-h1" data-reveal style="--reveal-delay:0ms">
+      <span class="hero-line"><span class="gradient-text">Markdown</span> in,</span>
+      <span class="hero-line">presentation out.</span>
+    </h1>
+
+    <p class="hero-sub" data-reveal style="--reveal-delay:120ms">
+      One markdown file is the whole deck.<br class="hero-br" />
+      Present, build to static HTML, or export a PDF.
+    </p>
+
+    <div data-reveal style="--reveal-delay:220ms; width:100%; display:flex; justify-content:center;">
+      <InstallCard tabs={HERO_INSTALL_TABS} variant="hero" id="hero-install" />
+    </div>
+
+    <div class="hero-buttons" data-reveal style="--reveal-delay:340ms">
+      <a class="btn btn-primary" href="#demo">
+        See a live deck <ArrowRight size={14} />
+      </a>
+      <a class="btn btn-secondary" href={REPO_URL} target="_blank" rel="noopener">
+        <Star size={14} /> Star on GitHub
+      </a>
+    </div>
+
+    <ul class="chip-row" aria-label="Project metadata" data-reveal style="--reveal-delay:440ms">
+      <li class="chip">
+        <span class="chip-label">npm</span>
+        <span class="chip-value">v{version}</span>
+      </li>
+      <li class="chip">MIT</li>
+      <li class="chip">Node 18+</li>
+    </ul>
+  </div>
+</section>
+
+<script>
+  import '../scripts/install-tabs.ts';
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    padding: clamp(24px, 4vh, 56px) 0 clamp(56px, 9vh, 96px);
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .hero-glow {
+    position: absolute;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1200px;
+    height: 800px;
+    background: radial-gradient(ellipse at center, rgba(255, 69, 0, 0.18) 0%, rgba(255, 0, 128, 0.08) 35%, transparent 60%);
+    filter: blur(40px);
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.9;
+  }
+  :global(html[data-theme='light']) .hero-glow {
+    background: radial-gradient(ellipse at center, rgba(255, 69, 0, 0.10) 0%, rgba(255, 0, 128, 0.05) 35%, transparent 60%);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-glow { opacity: 0.4; }
+  }
+
+  .hero-inner {
+    max-width: 880px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 28px;
+  }
+
+  .hero-h1 {
+    font-size: clamp(44px, 7vw, 96px);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    font-weight: 800;
+    color: var(--text);
+    margin: 4px 0 0;
+    max-width: 14ch;
+  }
+  .hero-line { display: block; }
+
+  .hero-sub {
+    font-size: clamp(16px, 2vw, 19px);
+    line-height: 1.55;
+    color: var(--text-muted);
+    max-width: 560px;
+    margin: 0;
+  }
+
+  .hero-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 4px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 18px;
+    height: 42px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background var(--t-fast), border-color var(--t-fast), transform var(--t-fast), color var(--t-fast);
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-primary {
+    color: var(--text);
+    background:
+      linear-gradient(var(--bg), var(--bg)) padding-box,
+      var(--grad) border-box;
+    border: 1px solid transparent;
+  }
+  .btn-primary:hover {
+    background:
+      var(--grad-soft) padding-box,
+      var(--grad) border-box;
+  }
+  .btn-secondary {
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+  }
+  .btn-secondary:hover {
+    background: var(--surface-2);
+    border-color: color-mix(in srgb, var(--accent-orange) 35%, var(--border-strong));
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .btn:hover { transform: none; }
+  }
+
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    list-style: none;
+    padding: 0;
+    margin: 12px 0 0;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--bg-2);
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .chip-label {
+    text-transform: uppercase;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+  }
+  .chip-value { color: var(--text); }
+
+  @media (max-width: 640px) {
+    .hero-br { display: none; }
+  }
+</style>

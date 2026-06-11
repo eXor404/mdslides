@@ -1,0 +1,171 @@
+---
+import Logo from './Logo.astro';
+import Sun from './icons/Sun.astro';
+import Moon from './icons/Moon.astro';
+import Github from './icons/Github.astro';
+import ArrowRight from './icons/ArrowRight.astro';
+import { REPO_URL, DOCS_URL } from '../lib/links';
+---
+
+<header class="header">
+  <div class="header-inner">
+    <a class="brand" href="#hero" aria-label="mdslides — home">
+      <Logo size={28} />
+      <span class="brand-name">mdslides</span>
+    </a>
+
+    <nav class="page-nav" aria-label="Page sections">
+      <a href="#demo">Live deck</a>
+      <a href="#install">Install</a>
+      <a href="#cli">CLI</a>
+    </nav>
+
+    <div class="header-spacer"></div>
+
+    <button
+      class="theme-toggle"
+      type="button"
+      data-theme-toggle
+      aria-label="Toggle theme"
+      aria-pressed="false"
+    >
+      <span class="theme-toggle-icon theme-toggle-icon--sun"><Sun size={16} /></span>
+      <span class="theme-toggle-icon theme-toggle-icon--moon"><Moon size={16} /></span>
+    </button>
+
+    <a class="header-icon" href={REPO_URL} target="_blank" rel="noopener" aria-label="GitHub repository">
+      <Github size={18} />
+    </a>
+
+    {/* TODO: swap to docs site URL when published */}
+    <a class="header-cta" href={DOCS_URL} target="_blank" rel="noopener">
+      Docs <ArrowRight size={12} />
+    </a>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: var(--header-h);
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
+    backdrop-filter: saturate(180%) blur(12px);
+    -webkit-backdrop-filter: saturate(180%) blur(12px);
+    border-bottom: 1px solid var(--border);
+    transition: background-color var(--t-theme), border-color var(--t-theme);
+  }
+  .header-inner {
+    height: 100%;
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    border-radius: 8px;
+  }
+  .brand-name { font-family: var(--font); }
+  .page-nav {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .page-nav::-webkit-scrollbar { display: none; }
+  .page-nav a {
+    padding: 6px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    border-radius: 6px;
+    white-space: nowrap;
+    transition: color var(--t-fast), background-color var(--t-fast);
+  }
+  .page-nav a:hover { color: var(--text); background: var(--surface-2); }
+
+  .header-spacer { flex: 1; }
+
+  .theme-toggle {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: var(--text-muted);
+    transition: color var(--t-fast), background-color var(--t-fast), border-color var(--t-fast);
+    flex-shrink: 0;
+    position: relative;
+  }
+  .theme-toggle:hover { color: var(--text); background: var(--surface-2); border-color: var(--border); }
+  .theme-toggle-icon {
+    display: grid;
+    place-items: center;
+    grid-area: 1 / 1;
+    transition: opacity var(--t-fast), transform var(--t-fast);
+  }
+  .theme-toggle .theme-toggle-icon--sun,
+  .theme-toggle .theme-toggle-icon--moon {
+    grid-area: 1 / 1;
+  }
+  .theme-toggle { display: inline-grid; }
+  :global(html[data-theme='dark']) .theme-toggle .theme-toggle-icon--sun { opacity: 1; transform: rotate(0); }
+  :global(html[data-theme='dark']) .theme-toggle .theme-toggle-icon--moon { opacity: 0; transform: rotate(90deg); }
+  :global(html[data-theme='light']) .theme-toggle .theme-toggle-icon--sun { opacity: 0; transform: rotate(-90deg); }
+  :global(html[data-theme='light']) .theme-toggle .theme-toggle-icon--moon { opacity: 1; transform: rotate(0); }
+
+  .header-icon {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    color: var(--text-muted);
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: color var(--t-fast), background-color var(--t-fast), border-color var(--t-fast);
+    flex-shrink: 0;
+  }
+  .header-icon:hover { color: var(--text); background: var(--surface-2); border-color: var(--border); }
+
+  .header-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    background:
+      linear-gradient(var(--bg), var(--bg)) padding-box,
+      var(--grad) border-box;
+    border: 1px solid transparent;
+    transition: background var(--t-fast), transform var(--t-fast);
+    flex-shrink: 0;
+  }
+  .header-cta:hover {
+    background:
+      var(--grad-soft) padding-box,
+      var(--grad) border-box;
+  }
+
+  @media (max-width: 880px) {
+    .header-inner { gap: 12px; padding: 0 16px; }
+    .page-nav { display: none; }
+    .header-cta { padding: 0 10px; }
+  }
+</style>

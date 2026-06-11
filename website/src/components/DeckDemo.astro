@@ -1,0 +1,297 @@
+---
+import ArrowRight from './icons/ArrowRight.astro';
+
+// The deck under /deck-demo/ is produced at build time by
+// scripts/build-deck-demo.mjs — it runs the real `mdslides build` against
+// fixtures/slides.md and stages the self-contained output here.
+// Point at index.html explicitly: the site uses trailingSlash 'never', so the
+// Astro dev server 404s the bare /deck-demo/ directory URL (a static host would
+// auto-serve the index). /deck-demo/index.html resolves identically everywhere.
+const DECK_URL = '/deck-demo/index.html';
+
+const hints = [
+  { keys: ['←', '→'], label: 'move' },
+  { keys: ['O'], label: 'overview' },
+  { keys: ['F'], label: 'fullscreen' },
+  { keys: ['.'], label: 'black' },
+];
+---
+
+<section id="demo" class="demo">
+  <div class="demo-glow" aria-hidden="true"></div>
+
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <p class="eyebrow">Live deck</p>
+      <h2>This whole deck is one markdown file.</h2>
+      <p>
+        The presentation below was produced by <code>mdslides build</code> from a single
+        <code>slides.md</code> — nothing staged, nothing faked. Click in and drive it with your
+        arrow keys.
+      </p>
+    </div>
+
+    <figure class="deck-frame" data-reveal style="--reveal-delay:80ms">
+      <div class="deck-chrome">
+        <span class="dot dot-r"></span>
+        <span class="dot dot-y"></span>
+        <span class="dot dot-g"></span>
+        <span class="deck-url" aria-hidden="true">
+          <span class="deck-url-prompt">$</span> mdslides ./deck
+        </span>
+        <span class="deck-chrome-spacer"></span>
+        <a class="deck-pop" href={DECK_URL} target="_blank" rel="noopener" aria-label="Open the deck in a new tab">
+          Open full tab <ArrowRight size={12} />
+        </a>
+      </div>
+
+      <div class="deck-stage">
+        <iframe
+          class="deck-iframe"
+          src={DECK_URL}
+          title="A live mdslides presentation, built from one markdown file"
+          loading="lazy"
+          allow="fullscreen"
+        ></iframe>
+        <button type="button" class="deck-veil" data-deck-veil aria-label="Activate the deck">
+          <span class="deck-veil-inner">
+            <span class="deck-play" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </span>
+            <span class="deck-veil-text">Click to present</span>
+            <span class="deck-veil-sub">then use <kbd>←</kbd> <kbd>→</kbd> to move</span>
+          </span>
+        </button>
+      </div>
+
+      <figcaption class="deck-hints">
+        <ul class="deck-hint-list">
+          {hints.map((h) => (
+            <li class="deck-hint">
+              <span class="deck-keys">
+                {h.keys.map((k) => <kbd>{k}</kbd>)}
+              </span>
+              <span class="deck-hint-label">{h.label}</span>
+            </li>
+          ))}
+        </ul>
+        <span class="deck-source">built from <code>fixtures/slides.md</code></span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<script>
+  // The veil keeps the iframe from swallowing page scroll until the visitor
+  // opts in; clicking it hands focus to the deck so keyboard nav works.
+  document.querySelectorAll('[data-deck-veil]').forEach((veil) => {
+    veil.addEventListener('click', () => {
+      const frame = veil.parentElement?.querySelector('iframe');
+      veil.setAttribute('hidden', '');
+      if (frame instanceof HTMLIFrameElement) {
+        frame.focus();
+        try {
+          frame.contentWindow?.focus();
+        } catch {
+          // cross-origin guard — same-origin here, but stay defensive
+        }
+      }
+    });
+  });
+</script>
+
+<style>
+  .demo {
+    position: relative;
+    padding: clamp(40px, 7vh, 88px) 0 clamp(24px, 4vh, 48px);
+    isolation: isolate;
+  }
+  .demo-glow {
+    position: absolute;
+    top: 6%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(1100px, 92vw);
+    height: 520px;
+    background: radial-gradient(ellipse at center, rgba(255, 0, 128, 0.10) 0%, rgba(255, 69, 0, 0.08) 40%, transparent 68%);
+    filter: blur(50px);
+    pointer-events: none;
+    z-index: -1;
+  }
+  :global(html[data-theme='light']) .demo-glow {
+    background: radial-gradient(ellipse at center, rgba(255, 0, 128, 0.06) 0%, rgba(255, 69, 0, 0.05) 40%, transparent 68%);
+  }
+
+  .deck-frame {
+    max-width: 1000px;
+    margin: 36px auto 0;
+    border-radius: 16px;
+    background:
+      linear-gradient(var(--surface), var(--surface)) padding-box,
+      var(--grad) border-box;
+    border: 1px solid transparent;
+    box-shadow: 0 32px 90px -36px rgba(255, 69, 0, 0.42);
+    overflow: hidden;
+  }
+
+  .deck-chrome {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in srgb, var(--bg-2) 80%, transparent);
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .dot-r { background: #ff5f56; }
+  .dot-y { background: #ffbd2e; }
+  .dot-g { background: #27c93f; }
+  .deck-url {
+    margin-left: 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .deck-url-prompt { color: var(--text-dim); margin-right: 4px; }
+  .deck-chrome-spacer { flex: 1; }
+  .deck-pop {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 5px 10px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    white-space: nowrap;
+    transition: color var(--t-fast), border-color var(--t-fast), background var(--t-fast);
+  }
+  .deck-pop:hover {
+    color: var(--text);
+    border-color: var(--border-strong);
+    background: var(--surface-2);
+  }
+
+  .deck-stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: var(--code-block-bg);
+  }
+  .deck-iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+  }
+
+  .deck-veil {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    border: 0;
+    cursor: pointer;
+    background:
+      radial-gradient(ellipse at center, rgba(13,13,13,0.10), rgba(13,13,13,0.55)),
+      color-mix(in srgb, var(--bg) 30%, transparent);
+    -webkit-backdrop-filter: blur(1px);
+    backdrop-filter: blur(1px);
+    transition: opacity var(--t-fast);
+  }
+  .deck-veil[hidden] { display: none; }
+  .deck-veil-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+    transition: transform var(--t-fast);
+  }
+  .deck-veil:hover .deck-veil-inner { transform: translateY(-2px); }
+  .deck-play {
+    display: grid;
+    place-items: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    color: #fff;
+    background: var(--grad);
+    box-shadow: 0 14px 40px -10px rgba(255, 69, 0, 0.6);
+    padding-left: 3px;
+  }
+  .deck-veil-text {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .deck-veil-sub {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .deck-hints {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 16px;
+    margin: 0;
+    border-top: 1px solid var(--border);
+    background: var(--bg-2);
+  }
+  .deck-hint-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .deck-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+  .deck-keys { display: inline-flex; gap: 3px; }
+  .deck-source {
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .deck-source code,
+  .deck-hint-label { white-space: nowrap; }
+
+  kbd {
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1;
+    padding: 3px 6px;
+    border-radius: 5px;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 1px 0 var(--border-strong);
+  }
+
+  @media (max-width: 640px) {
+    .deck-url { font-size: 11px; }
+    .deck-pop { padding: 5px 8px; }
+    .deck-source { display: none; }
+    .deck-hints { justify-content: center; }
+  }
+</style>

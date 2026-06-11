@@ -1,0 +1,147 @@
+---
+const commands = [
+  { name: 'dev',     desc: 'Present in a live-reload dev server (default if the verb is omitted)' },
+  { name: 'build',   desc: 'Static build → a self-contained <folder>/dist/' },
+  { name: 'preview', desc: 'Serve the built dist/ locally' },
+  { name: 'export',  desc: 'Render the deck to a PDF — one page per slide' },
+];
+
+const keys = [
+  { key: '→ · space · PageDn', action: 'next slide / reveal next fragment' },
+  { key: '← · PageUp',         action: 'previous' },
+  { key: 'O',                  action: 'overview grid — click a slide to jump' },
+  { key: 'F',                  action: 'fullscreen' },
+  { key: '.',                  action: 'black the screen' },
+  { key: '?',                  action: 'help' },
+];
+---
+
+<section id="cli" class="cli">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <p class="eyebrow">CLI</p>
+      <h2>One binary, four verbs.</h2>
+      <p>Point <code>mdslides</code> at a folder or a single <code>.md</code> file. No verb means present.</p>
+    </div>
+
+    <div class="cli-wrap" data-reveal style="--reveal-delay:80ms">
+      <table class="cli-table">
+        <thead>
+          <tr>
+            <th>Command</th>
+            <th>What it does</th>
+          </tr>
+        </thead>
+        <tbody>
+          {commands.map((cmd) => (
+            <tr>
+              <td><code>{cmd.name}</code></td>
+              <td>{cmd.desc}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <div class="cli-flags">
+        <p class="cli-flags-h">Presenter keys</p>
+        <table class="cli-table cli-table--keys">
+          <tbody>
+            {keys.map((k) => (
+              <tr>
+                <td><code>{k.key}</code></td>
+                <td>{k.action}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cli-wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .cli-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14.5px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .cli-table th, .cli-table td {
+    padding: 14px 18px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .cli-table tbody tr:last-child td { border-bottom: 0; }
+  .cli-table thead tr {
+    position: relative;
+    background: var(--grad-soft);
+  }
+  .cli-table thead tr::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 1px;
+    background: var(--grad);
+    opacity: 0.45;
+  }
+  .cli-table th {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: transparent;
+    border-bottom: 0;
+  }
+  .cli-table td { color: var(--text-muted); }
+  .cli-table td:first-child {
+    width: 30%;
+    color: var(--text);
+  }
+  .cli-table td code {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 3px 8px;
+    background: var(--code-bg);
+    border-radius: 5px;
+    color: var(--text);
+  }
+  .cli-table tbody tr {
+    transition: background var(--t-fast);
+  }
+  .cli-table tbody tr:hover { background: rgba(255, 255, 255, 0.02); }
+  [data-theme='light'] .cli-table tbody tr:hover { background: rgba(0, 0, 0, 0.02); }
+
+  .cli-flags-h {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin: 0 0 10px;
+  }
+  .cli-flags-pre {
+    margin: 0;
+    padding: 18px 20px;
+    background: var(--code-block-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text);
+    overflow-x: auto;
+    white-space: pre;
+  }
+</style>

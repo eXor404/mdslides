@@ -1,0 +1,45 @@
+---
+interface Props {
+  size?: number;
+  class?: string;
+}
+const { size = 28, class: className = '' } = Astro.props;
+const radius = Math.round(size * 0.25);
+const innerInset = Math.round(size * 0.143);
+const innerRadius = Math.max(2, Math.round(size * 0.143));
+const diamondInset = Math.round(size * 0.286);
+---
+
+<span
+  class:list={['brand-mark', className]}
+  style={`--mark-size:${size}px;--mark-radius:${radius}px;--mark-inner-inset:${innerInset}px;--mark-inner-radius:${innerRadius}px;--mark-diamond-inset:${diamondInset}px;`}
+  aria-hidden="true"
+></span>
+
+<style>
+  .brand-mark {
+    display: inline-block;
+    width: var(--mark-size);
+    height: var(--mark-size);
+    border-radius: var(--mark-radius);
+    background: var(--grad);
+    position: relative;
+    flex-shrink: 0;
+    box-shadow: 0 4px 18px rgba(255, 69, 0, 0.3);
+  }
+  .brand-mark::before {
+    content: '';
+    position: absolute;
+    inset: var(--mark-inner-inset);
+    background: var(--bg);
+    border-radius: var(--mark-inner-radius);
+    transition: background-color var(--t-theme);
+  }
+  .brand-mark::after {
+    content: '';
+    position: absolute;
+    inset: var(--mark-diamond-inset);
+    background: var(--grad);
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  }
+</style>

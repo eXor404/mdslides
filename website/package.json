@@ -1,0 +1,17 @@
+{
+  "name": "mdslides-website",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "node scripts/build-deck-demo.mjs && node scripts/fetch-version.mjs && astro build",
+    "build:fast": "node scripts/fetch-version.mjs && astro build",
+    "build:demo": "node scripts/build-deck-demo.mjs",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^6.2.1"
+  }
+}

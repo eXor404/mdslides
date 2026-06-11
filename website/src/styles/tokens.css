@@ -1,0 +1,58 @@
+/* Design tokens — mirror of app/src/themes/angular.css so the site
+   and the angular theme are visually identical. */
+
+:root {
+  /* Brand gradient (the signature) */
+  --grad: linear-gradient(135deg, #ff0080 0%, #ff4500 50%, #ffa500 100%);
+  --grad-soft: linear-gradient(135deg, rgba(255,0,128,0.12) 0%, rgba(255,69,0,0.10) 50%, rgba(255,165,0,0.10) 100%);
+
+  /* Dark theme (default) */
+  --bg:           #0d0d0d;
+  --bg-2:         #131314;
+  --surface:      #1a1a1c;
+  --surface-2:    #1f1f22;
+  --surface-3:    #25252a;
+  --border:       rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.16);
+  --text:         #e5e5e5;
+  --text-muted:   #9ca3af;
+  --text-dim:     #6b7280;
+  --code-bg:      rgba(255,255,255,0.06);
+  --code-block-bg: #0a0a0b;
+
+  --accent-red:    #ff4d6a;
+  --accent-orange: #ff9248;
+  --accent-yellow: #facc15;
+  --accent-green:  #34d399;
+  --accent-blue:   #60a5fa;
+  --accent-cyan:   #22d3ee;
+  --accent-purple: #c084fc;
+
+  /* Layout */
+  --header-h: 56px;
+  --container-max: 1180px;
+  --content-max: 880px;
+
+  /* Typography */
+  --font: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Motion */
+  --t-fast: 150ms ease-out;
+  --t-theme: 200ms ease-out;
+}
+
+[data-theme="light"] {
+  --bg:            #ffffff;
+  --bg-2:          #fafafa;
+  --surface:       #f7f7f8;
+  --surface-2:     #f0f0f2;
+  --surface-3:     #e7e7ea;
+  --border:        rgba(0,0,0,0.08);
+  --border-strong: rgba(0,0,0,0.16);
+  --text:          #18181b;
+  --text-muted:    #52525b;
+  --text-dim:      #71717a;
+  --code-bg:       rgba(0,0,0,0.05);
+  --code-block-bg: #f7f7f8;
+}
