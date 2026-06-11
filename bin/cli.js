@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, resolve, isAbsolute, relative, basename, extname } from 'node:path';
-import { existsSync, statSync, writeFileSync, readFileSync, mkdirSync } from 'node:fs';
+import { existsSync, statSync, writeFileSync, readFileSync, mkdirSync, readdirSync } from 'node:fs';
+import { createInterface } from 'node:readline';
 import { findChrome, printUrlToPdf } from '../app/integrations/pdf-export.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -66,28 +67,67 @@ function parseArgs(argv) {
   return { cmd, theme, file };
 }
 
-// The primary model: point at a (usually empty) folder. mdslides looks for
-// slides.md / index.md, and scaffolds a starter slides.md if there's none.
-// A direct path to a .md file is also accepted.
-function resolveDeck(input) {
+// The primary model: point at a folder. mdslides looks for an existing deck
+// (slides.md / index.md / any .md), and otherwise scaffolds a new project —
+// asking for a name and dropping a `<name>.md` starter (3 sample slides) you
+// then edit. A direct path to a .md file is also accepted (scaffolded as-is).
+async function resolveDeck(input) {
   let abs = isAbsolute(input) ? input : resolve(process.cwd(), input);
 
   if (existsSync(abs) && statSync(abs).isDirectory()) {
-    const candidates = ['slides.md', 'index.md'];
-    const found = candidates.map((c) => resolve(abs, c)).find((p) => existsSync(p));
-    abs = found ?? scaffoldDeck(resolve(abs, 'slides.md'));
+    abs = findDeckInDir(abs) ?? (await scaffoldProject(abs));
   } else if (!existsSync(abs)) {
-    // A non-existent path: treat as a .md file to create, or a folder to
-    // create a deck in if it has no .md extension.
+    // A non-existent path: a `.md` file gets scaffolded under that exact name;
+    // anything else is treated as a new project folder to create a deck in.
     abs = extname(abs).toLowerCase() === '.md'
       ? scaffoldDeck(abs)
-      : scaffoldDeck(resolve(abs, 'slides.md'));
+      : await scaffoldProject(abs);
   }
 
   if (!existsSync(abs) || !statSync(abs).isFile()) {
     fail(`Deck not found: ${abs}`);
   }
   return abs;
+}
+
+// Find an existing deck in a folder: prefer slides.md / index.md, then fall
+// back to the first .md file present (so a `chemistry.md` is picked up too).
+function findDeckInDir(dir) {
+  for (const name of ['slides.md', 'index.md']) {
+    const p = resolve(dir, name);
+    if (existsSync(p)) return p;
+  }
+  const md = readdirSync(dir).filter((f) => f.toLowerCase().endsWith('.md')).sort();
+  return md.length ? resolve(dir, md[0]) : null;
+}
+
+// Turn a free-text presentation name into a safe filename stem.
+function slugify(name) {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
+// Ask a question on the terminal, returning the trimmed answer (or `def` if
+// there's no answer / no interactive TTY, e.g. when run in CI).
+function ask(question, def) {
+  if (!process.stdin.isTTY) return Promise.resolve(def);
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise((res) => {
+    let done = false;
+    const finish = (val) => { if (!done) { done = true; rl.close(); res(val); } };
+    rl.question(question, (ans) => finish(ans.trim() || def));
+    // EOF (piped/closed stdin) → fall back to the default instead of hanging.
+    rl.on('close', () => finish(def));
+  });
+}
+
+// Scaffold a new project inside `dir`: prompt for a presentation name and
+// write `<name>.md` with the starter deck. The folder's own name is the
+// default, so `mdslides ./chemistry` + Enter → chemistry/chemistry.md.
+async function scaffoldProject(dir) {
+  const fallback = slugify(basename(dir)) || 'slides';
+  const answer = await ask(`Name your presentation (${fallback}): `, fallback);
+  const stem = slugify(answer.replace(/\.md$/i, '')) || fallback;
+  return scaffoldDeck(resolve(dir, `${stem}.md`));
 }
 
 function scaffoldDeck(deckPath) {
@@ -97,7 +137,7 @@ function scaffoldDeck(deckPath) {
     const content = readFileSync(templatePath, 'utf8');
     writeFileSync(deckPath, content, 'utf8');
     const rel = relative(process.cwd(), deckPath) || deckPath;
-    console.log(`mdslides: created ${rel} — edit the title, subtitle, presenter and date, then it reloads`);
+    console.log(`mdslides: created ${rel} (3 sample slides) — edit it and the deck live-reloads`);
     return deckPath;
   } catch (err) {
     fail(`couldn't create a starter deck: ${err.message}`);
@@ -129,7 +169,7 @@ async function loadUserConfig(source) {
 }
 
 const { cmd, theme: cliTheme, file } = parseArgs(process.argv);
-const deckFile = resolveDeck(file);
+const deckFile = await resolveDeck(file);
 const source = dirname(deckFile);
 
 ensureDefaultConfig(source);

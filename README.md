@@ -12,21 +12,24 @@ dev server or builds a self-contained `dist/` you can host anywhere static.
 ## Quick start
 
 ```bash
-mkdir my-talk
-mdslides ./my-talk            # creates my-talk/slides.md and presents it
+mdslides ./chemistry          # scaffolds a project, then presents it
 ```
 
-`mdslides` drops a starter `slides.md` (title, subtitle, presenter, date) into
-the folder and opens the dev server. Edit the file and the deck live-reloads.
+Point `mdslides` at a folder and it scaffolds a project: it **asks for a
+name**, writes `<name>.md` (e.g. `chemistry.md`) with three sample slides — a
+title page, a list, and a help slide — plus a `mdslides.config.js`, then opens
+the dev server. The name defaults to the folder, so pressing Enter at
+`Name your presentation (chemistry):` gives you `chemistry/chemistry.md`. That
+file *is* your deck — edit it and the slides live-reload.
 
 ```bash
-mdslides ./my-talk            # present (dev server, live-reload)
-mdslides build ./my-talk      # static build → ./my-talk/dist/
-mdslides preview ./my-talk    # serve the built dist/
-mdslides export ./my-talk     # → slides.pdf (one page per slide)
+mdslides ./chemistry          # present (dev server, live-reload)
+mdslides build ./chemistry    # static build → ./chemistry/dist/
+mdslides preview ./chemistry  # serve the built dist/
+mdslides export ./chemistry   # → chemistry.pdf (one page per slide)
 ```
 
-You can also point straight at a file: `mdslides ./my-talk/slides.md`.
+Already have a deck? Point straight at the file: `mdslides ./chemistry.md`.
 
 Try the bundled example:
 
@@ -37,7 +40,7 @@ npm run dev        # opens ./example
 
 ## The deck model
 
-**One `slides.md` file is the whole deck.** Every `#` (H1) heading starts a new
+**One markdown file is the whole deck.** Every `#` (H1) heading starts a new
 slide — write plain markdown in between. A standalone `---` line is an
 explicit break (for a slide with no heading, or to split one section).
 
