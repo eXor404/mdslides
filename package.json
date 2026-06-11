@@ -1,6 +1,6 @@
 {
   "name": "@exor404/mdslides",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Markdown in, presentation out.",
   "type": "module",
   "bin": {
