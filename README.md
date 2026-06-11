@@ -145,10 +145,14 @@ fragments shown). It uses [Playwright](https://playwright.dev) if installed
 ## Releasing
 
 Releases are automated by a tag-triggered GitHub Actions pipeline
-([`.github/workflows/package-publish.yml`](.github/workflows/package-publish.yml)) —
-the same model as mdstack's release workflow. Pushing a `v*` tag builds and
-publishes the package to **GitHub Packages** (GitHub's npm registry) using the
-built-in `GITHUB_TOKEN`, so there's no secret to configure.
+([`.github/workflows/package-publish.yml`](.github/workflows/package-publish.yml)).
+Pushing a `v*` tag publishes the package to the **public npm registry**
+(npmjs.com), so anyone can `npx @exor404/mdslides`.
+
+**One-time setup:** create an npm **automation** access token
+(npmjs.com → *Access Tokens* → *Generate New Token* → *Automation*) and add it
+to the repo as a secret named **`NPM_TOKEN`**
+(*Settings → Secrets and variables → Actions → New repository secret*).
 
 To cut a release:
 
@@ -160,14 +164,6 @@ git push origin v0.1.1     # push the tag → the pipeline publishes
 
 `npm version` creates the matching `vX.Y.Z` tag for you. The workflow refuses
 to publish if the tag and `package.json` version disagree, so they can't drift.
-
-> **Installing a published version.** GitHub Packages is private to the scope's
-> registry, so consumers add one line to their `.npmrc`:
-> ```
-> @exor404:registry=https://npm.pkg.github.com
-> ```
-> and authenticate with a GitHub token that has `read:packages`. Then
-> `npm i @exor404/mdslides` resolves from GitHub Packages.
 
 ## Requirements
 
