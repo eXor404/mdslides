@@ -4,7 +4,7 @@
   "description": "Markdown in, presentation out.",
   "type": "module",
   "bin": {
-    "mdslides": "./bin/cli.js"
+    "mdslides": "bin/cli.js"
   },
   "files": [
     "bin",
