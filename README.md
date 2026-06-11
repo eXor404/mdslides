@@ -48,7 +48,7 @@ explicit break (for a slide with no heading, or to split one section).
 
 # Second slide
 - a point
-- another {.fragment}
+- another (bullets reveal one at a time)
 ```
 
 ### Title slide
@@ -64,10 +64,18 @@ slide as a title with `<!-- slide: title -->`.
 Only what slides actually need:
 
 - Headings, paragraphs, **bold**, *italic*, ~~strike~~, ==highlight==
-- Lists, tables, blockquotes
-- `inline code` and fenced code blocks (with a copy button)
+- Lists (reveal one item at a time — see [Reveal & motion](#reveal--motion)), tables, blockquotes
+- `inline code` and fenced code blocks (syntax-highlighted via [Shiki](https://shiki.style))
 - Math — `$inline$` and `$$block$$` via KaTeX
 - Images (relative paths resolve from the deck folder)
+
+Fence a block with a language for syntax highlighting:
+
+````markdown
+```js
+export default { theme: 'angular' };
+```
+````
 
 ## Presenting
 
@@ -83,9 +91,22 @@ Only what slides actually need:
 
 The URL hash tracks the current slide (`#/3`) so deep links work.
 
-### Fragments
+### Reveal & motion
 
-Append `{.fragment}` to any line to reveal it on a later press.
+Slides build themselves as you talk:
+
+- **Content fades in** when a slide opens — headings, paragraphs, images, code,
+  tables and quotes rise into place with a light stagger.
+- **Lists reveal step by step.** Every list item is hidden when the slide opens
+  and appears one at a time on `→` / `space`; `←` steps back. Once all items
+  are shown, the next press advances to the following slide. This is automatic —
+  you don't need to mark anything.
+- **Manual fragments.** Append `{.fragment}` to any other line (a paragraph,
+  a heading) to hold it back and reveal it on a later press, in document order
+  alongside the list items.
+
+In the **overview grid** and **PDF export**, everything is shown at once. Motion
+respects the OS "reduce motion" setting.
 
 ### Per-slide directives
 
