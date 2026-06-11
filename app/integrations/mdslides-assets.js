@@ -23,7 +23,15 @@ const MIME = {
 };
 
 const EXCLUDED_TOP = new Set(['dist', 'node_modules', '.git', '.astro', '.vscode', '.idea']);
-const EXCLUDED_FILES = new Set(['mdslides.config.js']);
+const EXCLUDED_FILES = new Set([
+  'mdslides.config.js',
+  // Project scaffolding that lives alongside the deck (npm create … layout) —
+  // never part of the presentation, so keep it out of the built dist/.
+  'package.json',
+  'package-lock.json',
+  'yarn.lock',
+  'pnpm-lock.yaml',
+]);
 
 function isExcludedRel(rel) {
   if (!rel || rel === '.' || rel === '..') return true;

@@ -1,7 +1,7 @@
 name: Publish Package
 
 # Tag-triggered release pipeline: it runs only when you push a version tag
-# (e.g. v0.1.2), then publishes to the public npm registry (npmjs.com) using
+# (e.g. v0.1.3), then publishes to the public npm registry (npmjs.com) using
 # an automation token stored as the `NPM_TOKEN` repository secret.
 #
 # One-time setup (see the README "Releasing" section):

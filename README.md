@@ -12,26 +12,36 @@ dev server or builds a self-contained `dist/` you can host anywhere static.
 ## Quick start
 
 ```bash
-mdslides ./chemistry          # scaffolds a project, then presents it
+npx @exor404/mdslides@latest
 ```
 
-Point `mdslides` at a folder and it scaffolds a project: it **asks for a
-name**, writes `<name>.md` (e.g. `chemistry.md`) with three sample slides — a
-title page, a list, and a help slide — plus a `mdslides.config.js`, then opens
-the dev server. The name defaults to the folder, so pressing Enter at
-`Name your presentation (chemistry):` gives you `chemistry/chemistry.md`. That
-file *is* your deck — edit it and the slides live-reload.
+No install step. It **asks for a name**, scaffolds `<name>/<name>.md` (three
+sample slides — a title page, a list, and a help slide) plus a
+`mdslides.config.js`, and opens the dev server. The name defaults to the current
+folder, so pressing Enter at `Name your presentation (chemistry):` gives you
+`chemistry/chemistry.md`. That file *is* your deck — edit it and the slides
+live-reload.
+
+Point it at a folder for the other commands:
 
 ```bash
-mdslides ./chemistry          # present (dev server, live-reload)
-mdslides build ./chemistry    # static build → ./chemistry/dist/
-mdslides preview ./chemistry  # serve the built dist/
-mdslides export ./chemistry   # → chemistry.pdf (one page per slide)
+npx @exor404/mdslides ./chemistry          # present (dev server, live-reload)
+npx @exor404/mdslides build ./chemistry    # static build → ./chemistry/dist/
+npx @exor404/mdslides preview ./chemistry  # serve the built dist/
+npx @exor404/mdslides export ./chemistry   # → chemistry.pdf (one page per slide)
 ```
 
-Already have a deck? Point straight at the file: `mdslides ./chemistry.md`.
+Already have a deck? Point straight at the file: `npx @exor404/mdslides ./chemistry.md`.
 
-Try the bundled example:
+> **Heads-up:** `npm install @exor404/mdslides` only *installs* the package —
+> running the CLI (via `npx`, as above) is what scaffolds and presents. Using
+> `npx` also keeps the engine's dependencies in npx's cache instead of bloating
+> a project's `node_modules`.
+
+Prefer a global command? `npm i -g @exor404/mdslides` makes `mdslides` available
+directly (`mdslides ./chemistry`).
+
+Try the bundled example from a clone:
 
 ```bash
 npm install
@@ -154,10 +164,10 @@ automation token stored as the `NPM_TOKEN` repository secret.
 ### How the pipeline works
 
 ```
-push tag v0.1.2 ──► GitHub Actions ──► checkout ──► setup Node 22
+push tag v0.1.3 ──► GitHub Actions ──► checkout ──► setup Node 22
                                           │
-                                          ├─ guard: tag (v0.1.2) must equal
-                                          │   package.json "version" (0.1.2),
+                                          ├─ guard: tag (v0.1.3) must equal
+                                          │   package.json "version" (0.1.3),
                                           │   else the run fails
                                           │
                                           └─ npm publish  (auth: NPM_TOKEN)
@@ -190,9 +200,9 @@ on your behalf.
 Once the secret is in place, every release is three commands:
 
 ```bash
-npm version patch          # bumps package.json (0.1.1 → 0.1.2) and commits + tags v0.1.2
+npm version patch          # bumps package.json (0.1.2 → 0.1.3) and commits + tags v0.1.3
 git push origin main       # push the version-bump commit
-git push origin v0.1.2     # push the tag → the pipeline publishes
+git push origin v0.1.3     # push the tag → the pipeline publishes
 ```
 
 `npm version patch` (or `minor` / `major`) bumps `package.json`, makes the commit,
@@ -203,8 +213,8 @@ green the new version is live on npm.
 **Prefer to bump by hand?** Edit `"version"` in `package.json`, then:
 
 ```bash
-git commit -am "🔖 Release 0.1.2"
-git tag v0.1.2             # must match package.json exactly, or the guard fails
+git commit -am "🔖 Release 0.1.3"
+git tag v0.1.3             # must match package.json exactly, or the guard fails
 git push && git push --tags
 ```
 

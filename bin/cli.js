@@ -60,7 +60,10 @@ function parseArgs(argv) {
     }
   }
 
-  if (!file) {
+  // No target + the default `dev` command → start a brand-new project: we'll
+  // prompt for a name and scaffold it. Any other command needs an explicit
+  // target (there's nothing to build/preview/export yet).
+  if (!file && cmd !== 'dev') {
     fail('Missing target.\nUsage: mdslides [dev|build|preview|export] [--theme <name>] <folder|file.md>');
   }
 
@@ -130,6 +133,21 @@ async function scaffoldProject(dir) {
   return scaffoldDeck(resolve(dir, `${stem}.md`));
 }
 
+// Start a project from scratch when `mdslides` is run with no target (e.g.
+// `npx @exor404/mdslides`): ask for a name, then create `<name>/<name>.md` in
+// the current directory and present it. No install or extra command needed.
+async function scaffoldNewProject() {
+  const fallback = slugify(basename(process.cwd())) || 'presentation';
+  const answer = await ask(`Name your presentation (${fallback}): `, fallback);
+  const stem = slugify(answer.replace(/\.md$/i, '')) || fallback;
+  const dir = resolve(process.cwd(), stem);
+  if (existsSync(dir) && statSync(dir).isDirectory() && findDeckInDir(dir)) {
+    // A deck already lives here — open it instead of clobbering anything.
+    return findDeckInDir(dir);
+  }
+  return scaffoldDeck(resolve(dir, `${stem}.md`));
+}
+
 function scaffoldDeck(deckPath) {
   const templatePath = resolve(__dirname, 'templates', 'slides.md');
   try {
@@ -169,7 +187,7 @@ async function loadUserConfig(source) {
 }
 
 const { cmd, theme: cliTheme, file } = parseArgs(process.argv);
-const deckFile = await resolveDeck(file);
+const deckFile = file ? await resolveDeck(file) : await scaffoldNewProject();
 const source = dirname(deckFile);
 
 ensureDefaultConfig(source);
