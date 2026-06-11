@@ -44,6 +44,23 @@ on your behalf.
 > If the package isn't published yet, do one manual publish first:
 > `npm login && npm publish --access public`.
 
+### Rotate the token every 90 days
+
+For security, **refresh the `NPM_TOKEN` at least every 90 days** — a leaked
+long-lived token can publish malicious versions, so it should be short-lived and
+rotated on a schedule. Set the token's expiry to 90 days when you create it on
+npmjs.com (granular tokens let you pick an expiry), put a recurring reminder on
+your calendar, and when it's due:
+
+1. On npmjs.com, generate a fresh token (same scope: read+write on
+   `@exor404/mdslides`).
+2. In GitHub, update the `NPM_TOKEN` secret with the new value
+   (**Settings → Secrets and variables → Actions → `NPM_TOKEN` → Update**).
+3. Revoke the old token on npmjs.com.
+
+If a release run fails with a `401`/`403` auth error, an expired or revoked
+token is the first thing to check.
+
 ## Cutting a release
 
 Once the secret is in place, every release is three commands:
