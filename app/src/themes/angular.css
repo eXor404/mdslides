@@ -251,6 +251,33 @@ hr { border: none; border-top: 1px solid var(--border); width: 100%; }
 .fragment.revealed { opacity: 1; transform: none; }
 .deck.overview .fragment, html.print .fragment { opacity: 1; transform: none; }
 
+/* ── Auto fade-in on slide open ──
+   Every block of content fades up when its slide becomes active — except
+   lists (ul/ol), which stay put, and manual-reveal `.fragment`s, which keep
+   their own step-by-step timing. A light stagger makes it read as intentional.
+   The animation re-runs each time you land on the slide (class toggles off
+   and back on), and is skipped in overview / print where everything shows at
+   once. */
+@keyframes mds-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+.slide.active :is(.slide-inner, .slide-head, .col-left, .col-right)
+  > :is(h1, h2, h3, h4, h5, h6, p, blockquote, pre, table, figure, img, hr, .katex-display):not(.fragment) {
+  animation: mds-enter .5s cubic-bezier(.21, .6, .35, 1) both;
+}
+/* Light stagger across the first several blocks in each container. */
+.slide.active :is(.slide-inner, .slide-head, .col-left, .col-right) > :nth-child(2) { animation-delay: .06s; }
+.slide.active :is(.slide-inner, .slide-head, .col-left, .col-right) > :nth-child(3) { animation-delay: .12s; }
+.slide.active :is(.slide-inner, .slide-head, .col-left, .col-right) > :nth-child(4) { animation-delay: .18s; }
+.slide.active :is(.slide-inner, .slide-head, .col-left, .col-right) > :nth-child(5) { animation-delay: .24s; }
+.slide.active :is(.slide-inner, .slide-head, .col-left, .col-right) > :nth-child(n+6) { animation-delay: .3s; }
+
+.deck.overview .slide :is(.slide-inner, .slide-head, .col-left, .col-right) > * { animation: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .slide.active :is(.slide-inner, .slide-head, .col-left, .col-right) > * { animation: none !important; }
+}
+
 /* ── Chrome (progress + controls) ── */
 .progress {
   position: fixed; left: 0; right: 0; bottom: 0; height: 3px;
