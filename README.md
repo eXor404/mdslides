@@ -48,6 +48,42 @@ npm install
 npm run dev        # opens ./example
 ```
 
+## Install
+
+The package is published on the public npm registry as
+[`@exor404/mdslides`](https://www.npmjs.com/package/@exor404/mdslides). Pick the
+option that suits you:
+
+**No install (recommended).** `npx` fetches and caches the latest version, then
+runs it — nothing is added to your project:
+
+```bash
+npx @exor404/mdslides@latest          # prompts for a name, scaffolds + presents
+```
+
+**Global install.** Puts an `mdslides` command on your `PATH`:
+
+```bash
+npm install -g @exor404/mdslides
+mdslides ./chemistry                  # then use it anywhere
+mdslides --help                       # (or run with no folder to start fresh)
+```
+
+Update later with `npm update -g @exor404/mdslides`; remove with
+`npm uninstall -g @exor404/mdslides`.
+
+**As a project dependency.** Add it to a repo so collaborators get the same
+version via `npm install`:
+
+```bash
+npm install -D @exor404/mdslides
+npx mdslides ./chemistry              # resolves from local node_modules
+```
+
+> Requires **Node 18+**. Installing the package pulls in its rendering engine
+> (Astro, Shiki, KaTeX) — that's why `npx` is the lightest way to try it: those
+> dependencies stay in npx's cache instead of your project's `node_modules`.
+
 ## The deck model
 
 **One markdown file is the whole deck.** Every `#` (H1) heading starts a new
