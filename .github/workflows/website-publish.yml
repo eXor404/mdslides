@@ -90,7 +90,7 @@ jobs:
             fi
 
             docker --config /tmp/docker-deploy-web pull ghcr.io/${{ env.IMAGE_NAME_LC }}:${{ github.ref_name }}
-            docker run -d --name ${{ env.CONTAINER_NAME }} -p ${{ env.HOST_PORT }}:80 --restart always ghcr.io/${{ env.IMAGE_NAME_LC }}:${{ github.ref_name }}
+            docker run -d --name ${{ env.CONTAINER_NAME }} -p 127.0.0.1:${{ env.HOST_PORT }}:80 --restart always ghcr.io/${{ env.IMAGE_NAME_LC }}:${{ github.ref_name }}
 
             docker image prune -f
             docker --config /tmp/docker-deploy-web logout ghcr.io
